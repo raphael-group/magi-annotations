@@ -1,0 +1,4 @@
+/* Annotations */
+table.count-tooltip-table tr#column-headings{ border-bottom:1px solid #fff;}
+table.count-tooltip-table td, table.count-tooltip-table th{ padding-left:5px;padding-right:5px;}
+table.count-tooltip-table .left{border-right:1px solid #fff;}

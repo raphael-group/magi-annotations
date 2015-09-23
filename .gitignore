@@ -1,5 +1,5 @@
 # Custom
-static/
+static/components
 db.sqlite3
 venv/
 */fixtures/*.json
