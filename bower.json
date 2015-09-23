@@ -1,0 +1,10 @@
+{
+  "name": "magipy",
+  "version": "0.0.1",
+  "dependencies": {
+    "jquery": "latest",
+    "d3": "latest",
+    "bootstrap": "3.x",
+    "DataTables": "latest"
+  }
+}

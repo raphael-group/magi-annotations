@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block title %}MAGI :: User {{ user.get_full_name|default:user.username }}{% endblock %}
+{% block content %}
+<h3>Account page for {{user.get_full_name|default:user.username}}</h3>
+<table class='table'>
+  <tr><th>Attribute</th><th>Value</th></tr>
+  <tr><td>Email</td><td>{{ user.email }}</td></tr>
+</table>
+{% endblock %}

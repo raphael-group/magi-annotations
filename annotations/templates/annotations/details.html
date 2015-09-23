@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+{% block title %}
+Annotations for {{ mutation.gene }} ({{ mutation.original_amino_acid}}{{ mutation.locus }}{{ mutation.new_amino_acid }}) with reference {{ ref.db }}{{ ref.identifier}} from {{ ref.source }}
+{% endblock %}
+{% block content %}
+{% load annotation_filters %}
+{% load annotation_tags %}
+<h3 class='text-center'>Annotations for <a href='{% url 'annotations:gene' gene_name=mutation.gene %}'>{{ mutation.gene }}</a> ({{ mutation.original_amino_acid}}{{ mutation.locus }}{{ mutation.new_amino_acid }}) with reference {% ref_link ref.identifier ref.db %} from {{ ref.source }}</h3>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+<!-- Add/Edit annotation panel  -->
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <a data-toggle='collapse' href='#collapseForm' aria-expanded='true' aria-controls='collapseForm'>
+      <h3 class="panel-title">
+        Add/Edit an annotation
+        <span style='float:right'>[+]</span>
+      </h3>
+    </a>
+  </div>
+  <div id='collapseForm' class='collapse in'>
+    <div class='panel-body'>
+      {% if user.is_authenticated %}
+        {% if user_annotation %}
+          {% url 'annotations:update' annotation_pk=user_annotation.pk as post_url %}
+        {% else %}
+          {% url 'annotations:save' as post_url %}
+        {% endif %}
+        <form method='POST' action='{{ post_url }}'>
+          {% csrf_token %}
+          <input type='hidden' name='reference_id' value='{{ ref.pk }}'>
+          <div class="form-group">
+            <label for='cancer'>Cancer</label>
+            {{ annotation_form.cancer|addclass:'form-control' }}
+          </div>
+          <div class="form-group">
+            <label>Heritability</label>
+            {{ annotation_form.heritable|addclass:'form-control' }}
+          </div>
+          <div class="form-group">
+            <label>Measurement Type</label>
+            {{ annotation_form.measurement_type|addclass:'form-control' }}
+          </div>
+          <div class="form-group">
+            <label>Characterization</label>
+            {{ annotation_form.characterization|addclass:'form-control' }}
+          </div>
+          <div class="form-group">
+            <label for='comment'>Comment</label>
+            {{ annotation_form.comment }}
+          </div>
+          <button class='btn btn-primary'>Submit</button>
+          {% if user_annotation %}
+            <b style='margin-left:15px'><a style='color:red' href='{% url 'annotations:remove_annotation' gene_name=mutation.gene ref_pk=ref.pk %}'>Delete</a></b>
+          {% endif %}
+        </form>
+      {% else %}
+        You must <a href='{% url 'login' %}'>login</a> to add/edit annotations.
+      {% endif %}
+    </div>
+  </div>
+</div>
+<!-- List existing annotations  -->
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Current annotations</h3>
+  </div>
+  <div class="panel-body">
+    If you've made an annotation, it is highlighted in light yellow below.
+    <table class='table table-striped'>
+      <tr><th>Last Edited</th><th>Cancer</th><th>Heritable</th><th>Measurement Type</th><th>Characterization</th><th>Comment</th></tr>
+      {% for A in annotations %}
+      <tr style='{% if A.user.pk == user.pk %}background:lightyellow;{% endif %}'>
+        <td>{{ A.last_edited }}</td>
+        <td>{{ A.cancer|default:'Unknown'}}</td>
+        <td>{{ A.get_heritable_display|default:'Unknown'}}</td>
+        <td>{{ A.get_measurement_type_display|default:'Unknown'}}</td>
+        <td>{{ A.get_characterization_display|default:'Unknown'}}</td>
+        <td>{{ A.comment|default:'None' }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

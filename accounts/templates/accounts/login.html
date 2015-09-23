@@ -1,0 +1,6 @@
+{% extends "layout.html" %}
+{% block title %}MAGI :: Login{% endblock %}
+{% block content %}
+<h3>Login to MAGI</h3>
+<a href='{% url 'social:begin' 'google-oauth2' %}?next={{ path }}'><button class='btn btn-primary'>Login with Google</button></a>
+{% endblock %}

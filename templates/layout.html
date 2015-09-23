@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>{% block title %}{% endblock %}</title>
+  <meta name="description" content="MAGI web application">
+  <meta name="author" content="Raphael research group at Brown University">
+  {% load staticfiles %}
+  <link rel="stylesheet" href="{% static "components/bootstrap/dist/css/bootstrap.min.css" %}">
+  <link rel="stylesheet" href="{% static "css/app.css" %}">
+</head>
+
+<body style='padding:15px'>
+  <h1>MAGI</h1>
+  <p>
+    {% if user and not user.is_anonymous %}
+      Hello, {{ user.get_full_name|default:user.username }} |
+      <a href='{% url 'logout' %}?next=/'>Logout</a>
+    {% else %}
+      <a href='{% url 'social:begin' 'google-oauth2' %}?next={{ path }}'>Login with Google</a>
+    {% endif %}
+  </p>
+  <hr style='clear:both'/>
+  {% block content %}{% endblock %}
+  <script src="{% static "components/jquery/dist/jquery.min.js" %}"></script>
+  <script src="{% static "components/bootstrap/dist/js/bootstrap.min.js" %}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

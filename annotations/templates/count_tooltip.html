@@ -1,0 +1,21 @@
+{% spaceless %}
+{% if items|length == 0 %}
+  No data.
+{% else %}
+  <span class='tooltip-toggle' data-toggle="tooltip" data-html="true" data-placement="{{placement}}"
+    title="<table class='count-tooltip-table text-center'>
+            <tr id='column-headings'>
+              <th class='text-center left'>{{ name }}</th>
+              <th class='text-center'>Count</th>
+            </tr>
+            {% for item in items %}
+            <tr>
+              <td class='left text-center'>{{ item.val }}</td>
+              <td class='text-center'>{{ item.count }}</td>
+            </tr>
+            {% endfor %}
+          </table>">
+    {{ items.0.val }} ({{ items.0.count }}/{{items.0.total}})
+  </span>
+{% endif %}
+{% endspaceless %}

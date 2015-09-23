@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+{% load annotation_tags %}
+{% block title %}Annotations for {{ gene }}{% endblock %}
+{% block content %}
+<h3>Annotations for {{ gene|upper }}</h3>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form class="form-inline">
+  <label for="geneName">Gene search</label>
+  <input class="form-control" type="text" id="geneName" placeholder="Gene name (e.g. TP53)">
+  <button id="geneSearch" type="submit" class="btn btn-default">Submit</button>
+</form>
+<br/>
+<table class='table table-striped'>
+  <tr style='background:#d3d3d3'>
+    <th>Class</th>
+    <th>Type</th>
+    <th style='border-right:1px solid #000'>Protein Sequence Change</th>
+    <th>Reference</th>
+    <th>Source</th>
+    <th>Cancer(s)</th>
+    <th>Somatic?</th>
+    <th>Measurement type</th>
+    <th>Characterization</th>
+    <th>Annotate</th>
+  </tr>
+  {% for A in annotations %}
+    <tr>
+      <td>{{ A.mutation_class }}</td>
+      <td>{{ A.mutation_type }}</td>
+      <td style='border-right:1px solid #000'>{{ A.oaa }}{{ A.locus }}{{ A.naa }}</td>
+      <td>{% ref_link A.identifier A.db %}</td>
+      <td>{{ A.source }}</td>
+      <td>{% count_tooltip 'Cancer' A.cancers 'right' 'upper' %}</td>
+      <td>{% count_tooltip 'Heritable' A.heritable 'right' %}</td>
+      <td>{% count_tooltip 'Measurement Type' A.measurement_type 'right' %}</td>
+      <td>{% count_tooltip 'Characterization' A.characterization 'right' %}</td>
+      <td>
+        <ul style='padding-left:12px'>
+          <li><a href='{% url 'annotations:details' ref_pk=A.ref_pk %}'>Add/Edit annotation</a></li>
+          {% if not A.no_annotations %}
+            {% if A.user_annotated %}
+              <li><a href='{% url 'annotations:remove_annotation' gene_name=gene ref_pk=A.ref_pk %}'>Remove your annotation</a></li>
+            {% else %}
+              <li><a class="like-btn" refPk="{{ A.ref_pk }}" cancer="{{ A.cancers.0.val }}" heritable="{{ A.heritable.0.val }}" measurementType="{{ A.measurement_type.0.val }}" characterization="{{ A.characterization.0.val }}">Agree with majority</a></li>
+            {% endif %}
+          {% endif %}
+      </ul>
+      </td>
+    </tr>
+{% empty %}
+  <tr><td colspan='9' style='text-align:center'>Sorry, no annotations for {{ gene }}.</td></tr>
+{% endfor %}
+</table>
+<form id='plus_one' method='POST' action='{% url 'annotations:plus_one' gene_name=gene %}'>{% csrf_token %}
+  <input type='hidden' name='refPk' id='refPk'>
+  <input type='hidden' name='cancer' id='cancer'>
+  <input type='hidden' name='heritable' id='heritable'>
+  <input type='hidden' name='measurementType' id='measurementType'>
+  <input type='hidden' name='characterization' id='characterization'>
+</form>
+{% endblock %}
+{% block scripts %}
+<script type='text/javascript'>
+  // Activate tooltips
+  $(function(){ $('span.tooltip-toggle').tooltip() });
+
+  // Perform gene search
+  $('button#geneSearch').click(function(e){
+    e.preventDefault();
+    var geneName = $('input#geneName').val();
+    if (geneName == ''){
+      alert('Please enter a gene name.');
+    } else {
+      window.location = '/annotations/' + geneName;
+    }
+  });
+
+  // Like buttons
+  var fieldNames = ['refPk', 'cancer', 'heritable', 'measurementType', 'characterization'],
+      hiddenForm = $('form#plus_one');
+  $('a.like-btn').click(function(){
+    var link = $(this);
+    fieldNames.forEach(function(n){
+      var val = link.attr(n);
+      if (val != '') hiddenForm.children('#' + n).val(val);
+    });
+    hiddenForm.submit();
+  });
+</script>
+{% endblock %}
