@@ -59,3 +59,11 @@ following commands on the command-line:
         >>> virtualenv venv
         >>> source venv/bin/activate
         >>> pip install -r requirements.txt
+
+3. **Bower**. Bower is required for managing Javascript dependencies. Install
+Bower, and then install the dependencies, with the commands:
+
+        >>> npm install -g bower
+        >>> bower install
+
+  This assumes that you have Node.js installed.
