@@ -57,7 +57,7 @@ class Reference(models.Model):
 
 class Annotation(models.Model):
     heritable        = models.CharField(max_length=8, choices=heritableChoices, blank=True)
-    cancer           = models.ForeignKey(Cancer, blank=True)
+    cancer           = models.ForeignKey(Cancer, blank=True, null=True)
     measurement_type = models.CharField(max_length=30, choices=measurementChoices, blank=True)
     characterization = models.CharField(max_length=20, choices=characterizationChoices, blank=True)
     reference        = models.ForeignKey(Reference)
