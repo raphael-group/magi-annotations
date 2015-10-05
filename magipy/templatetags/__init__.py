@@ -1,0 +1,1 @@
+import magipy_tags

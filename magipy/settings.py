@@ -42,7 +42,8 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'social.apps.django_app.default',
     'annotations',
-    'accounts'
+    'accounts',
+    'magipy'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -89,7 +90,7 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('MAGI_GOOGLE_CLIENT_ID')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('MAGI_GOOGLE_CLIENT_SECRET')
 LOGIN_URL = '/account/login'
 WSGI_APPLICATION = 'magipy.wsgi.application'
-
+NODE_MAGI_URL = os.environ.get('NODE_MAGI_URL', 'http://localhost:8000')
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases

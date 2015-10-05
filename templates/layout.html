@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-
   <title>{% block title %}{% endblock %}</title>
   <meta name="description" content="MAGI web application">
   <meta name="author" content="Raphael research group at Brown University">
@@ -10,19 +9,72 @@
   <link rel="stylesheet" href="{% static "components/bootstrap/dist/css/bootstrap.min.css" %}">
   <link rel="stylesheet" href="{% static "css/app.css" %}">
 </head>
-
-<body style='padding:15px'>
-  <h1><a href='{% url 'home' %}' style='color:rgb(51, 51, 51)'>MAGI</a></h1>
-  <p>
-    {% if user and not user.is_anonymous %}
-      Hello, {{ user.get_full_name|default:user.username }} |
-      <a href='{% url 'logout' %}?next=/'>Logout</a>
-    {% else %}
-      <a href='{% url 'social:begin' 'google-oauth2' %}?next={{ path }}'>Login with Google</a>
-    {% endif %}
-  </p>
-  <hr style='clear:both'/>
-  {% block content %}{% endblock %}
+<body>
+  {% load magipy_tags %}
+  <header>
+    <div class="navbar navbar-default" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#magi-navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">MAGI</a>
+        </div>
+        <div class="collapse navbar-collapse" id="magi-navbar-collapse">
+          <div class="nav navbar-left">
+            <div class="row">
+              <div id="topNavList">
+                <ul class="nav navbar-nav">
+                  <li><a href="{% node_magi_url '/' %}" id="navbar-query-btn" class="qry-button">Query</a></li>
+                  <li><a href="{% node_magi_url '/upload' %}">Upload</a></li>
+                  <li><a href="{% node_magi_url '/datasets' %}">Datasets</a></li>
+                  <li><a href="{% node_magi_url '/cancers' %}">Cancers</a></li>
+                  <li><a href="{% node_magi_url '/#db-chooser' %}" id="nav-instructions">Instructions</a></li>
+                  <li><a href="{% node_magi_url '/support' %}">Support</a></li>
+                  <li><a href="{% node_magi_url '/' %}">Feedback</a></li>
+                </ul>
+                </div>
+              </div>
+            </div>
+            <ul class="nav navbar-nav navbar-right" style="color:grey">
+              <li>
+                {# Ask the user to login or show his/her name #}
+                {% if user and not user.is_anonymous %}
+                  <div style="padding-top:14px;margin-right:5px">
+                    Hello, <a href='{% url 'profile' %}'>{{ user.get_full_name|default:user.username }}</a>
+                    | <a href="{% url 'logout' %}?next=/">Logout</a>
+                  </div>
+                {% else %}
+                  <a href='{% url 'social:begin' 'google-oauth2' %}?next={{ path }}'>
+                    <button type="button" class="btn btn-default btn-xs">Login via Google</button>
+                  </a>
+                {% endif %}
+              </li>
+            </ul>
+          </div>
+      </div>
+    </div>
+  </header>
+  <div id='content'>{% block content %}{% endblock %}</div>
+  <footer>
+    <hr/>
+    <div id="footer", class="container">
+      <p class="col-lg-4 text-left">Updated: October 5th, 2015</p>
+      <p class="col-lg-4 text-center">Copyright 2014-2015. All rights reserved.</p>
+      <ul id="more-info", class="col-lg-4 text-right">
+        <li><a href="{{ node_magi_url }}/acknowledgements">Acknowledgements</a></li>
+        <li><a href="{{ node_magi_url }}/support">Support</a></li>
+      </ul>
+      <ul id="even-more-info">
+        <li><a href="{% node_magi_url 'contact' %}">Contact</a></li>
+        <li><a href="{% node_magi_url '/privacy' %}" target="_new">Privacy</a></li>
+        <li><a href="{% node_magi_url '/terms' %}" target="_new">Terms</a></li>
+      </ul>
+    </div>
+  </footer>
   <script src="{% static "components/jquery/dist/jquery.min.js" %}"></script>
   <script src="{% static "components/bootstrap/dist/js/bootstrap.min.js" %}"></script>
   {% block scripts %}{% endblock %}

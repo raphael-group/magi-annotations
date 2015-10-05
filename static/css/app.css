@@ -1,3 +1,49 @@
+/* General styles */
+html,body{
+  margin: 0;
+  padding: 0;
+
+  font-family: 'Calibri', sans-serif
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+}
+
+h1, h2, h3, h4, h5{
+  margin:0;
+  padding:0;
+}
+
+/* Content */
+div#content{padding:15px;clear:both;}
+
+/* Header */
+div.navbar {
+  background: #333;
+  border:none;
+  border-bottom: 2px solid #8cc63f;
+  border-radius: 0;
+  margin-bottom: 0;
+}
+ul.nav li a {
+  color: #ccc;
+}
+ul.nav li a:hover {
+  color: #8cc63f !important;
+}
+.navbar-brand {
+  color: #6b73b5 !important;
+  font-weight: bold;
+}
+#topNavList ul.nav li a {
+  margin-top: 10px;
+  padding: 5px 15px;
+}
+
+/* Footer */
+ul#more-info, ul#even-more-info{list-style-type: none;padding-left:0px;}
+ul#more-info li, ul#even-more-info li{display:inline;padding-left:5px;padding-right:5px;}
+ul#even-more-info{ font-size:80%;text-align:center;}
+
 /* Annotations */
 table.count-tooltip-table tr#column-headings{ border-bottom:1px solid #fff;}
 table.count-tooltip-table td, table.count-tooltip-table th{ padding-left:5px;padding-right:5px;}
