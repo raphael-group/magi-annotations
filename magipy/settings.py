@@ -98,7 +98,7 @@ DATABASES = {
     'default': {
         'ENGINE'  : 'django.db.backends.postgresql_psycopg2',
         'NAME'    : os.environ.get('MAGI_POSTGRES_DB', 'magipy'),
-        'USER'    : os.environ.get('MAGI_POSTGRES_USER', 'mdml'),
+        'USER'    : os.environ.get('MAGI_POSTGRES_USER', 'postgres'),
         'PASSWORD': os.environ.get('MAGI_POSTGRES_PASSWORD', ''),
         'HOST'    : os.environ.get('MAGI_POSTGRES_HOST', ''),
         'PORT'    : os.environ.get('MAGI_POSTGRES_PORT', '5432'),

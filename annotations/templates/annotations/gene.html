@@ -24,25 +24,27 @@
     <th>Characterization</th>
     <th>Annotate</th>
   </tr>
-  {% for A in annotations %}
+  {% for ref in references %}
     <tr>
-      <td>{{ A.mutation_class }}</td>
-      <td>{{ A.mutation_type }}</td>
-      <td style='border-right:1px solid #000'>{{ A.oaa }}{{ A.locus }}{{ A.naa }}</td>
-      <td>{% ref_link A.identifier A.db %}</td>
-      <td>{{ A.source }}</td>
-      <td>{% count_tooltip 'Cancer' A.cancers 'right' 'upper' %}</td>
-      <td>{% count_tooltip 'Heritable' A.heritable 'right' %}</td>
-      <td>{% count_tooltip 'Measurement Type' A.measurement_type 'right' %}</td>
-      <td>{% count_tooltip 'Characterization' A.characterization 'right' %}</td>
+      <td>{{ ref.mutation__mutation_class }}</td>
+      <td>{{ ref.mutation__mutation_type }}</td>
+      <td style='border-right:1px solid #000'>
+        {{ ref.mutation__original_amino_acid }}{{ ref.mutation__locus }}{{ ref.mutation__new_amino_acid }}
+      </td>
+      <td>{% ref_link ref.identifier ref.db %}</td>
+      <td>{{ ref.source }}</td>
+      <td>{% count_tooltip 'Cancer' ref.counter.annotation__cancer__abbr 'right' 'upper' %}</td>
+      <td>{% count_tooltip 'Heritable' ref.counter.annotation__heritable 'right' mapper=mapper.heritable %}</td>
+      <td>{% count_tooltip 'Measurement Type' ref.counter.annotation__measurement_type 'right' mapper=mapper.measurement_type %}</td>
+      <td>{% count_tooltip 'Characterization' ref.counter.annotation__characterization 'left' mapper=mapper.characterization %}</td>
       <td>
         <ul style='padding-left:12px'>
-          <li><a href='{% url 'annotations:details' ref_pk=A.ref_pk %}'>Add/Edit annotation</a></li>
-          {% if not A.no_annotations %}
-            {% if A.user_annotated %}
-              <li><a href='{% url 'annotations:remove_annotation' gene_name=gene ref_pk=A.ref_pk %}'>Remove your annotation</a></li>
+          <li><a href='{% url 'annotations:details' ref_pk=ref.pk %}'>Add/Edit annotation</a></li>
+          {% if not ref.no_annotations %}
+            {% if ref.user_annotated %}
+              <li><a href='{% url 'annotations:remove_annotation' gene_name=gene ref_pk=ref.pk %}'>Remove your annotation(s)</a></li>
             {% else %}
-              <li><a class="like-btn" refPk="{{ A.ref_pk }}" cancer="{{ A.cancers.0.val }}" heritable="{{ A.heritable.0.val }}" measurementType="{{ A.measurement_type.0.val }}" characterization="{{ A.characterization.0.val }}">Agree with majority</a></li>
+              <li><a href='#' class='like-btn' refPk='{{ ref.pk }}' {% majority_link_attrs ref.counter %}>Agree with majority</a></li>
             {% endif %}
           {% endif %}
       </ul>
@@ -54,10 +56,10 @@
 </table>
 <form id='plus_one' method='POST' action='{% url 'annotations:plus_one' gene_name=gene %}'>{% csrf_token %}
   <input type='hidden' name='refPk' id='refPk'>
-  <input type='hidden' name='cancer' id='cancer'>
-  <input type='hidden' name='heritable' id='heritable'>
-  <input type='hidden' name='measurementType' id='measurementType'>
-  <input type='hidden' name='characterization' id='characterization'>
+  <input type='hidden' name='annotation__cancer__abbr' id='annotation__cancer__abbr'>
+  <input type='hidden' name='annotation__heritable' id='annotation__heritable'>
+  <input type='hidden' name='annotation__measurement_type' id='annotation__measurement_type'>
+  <input type='hidden' name='annotation__characterization' id='annotation__characterization'>
 </form>
 {% endblock %}
 {% block scripts %}
@@ -77,9 +79,10 @@
   });
 
   // Like buttons
-  var fieldNames = ['refPk', 'cancer', 'heritable', 'measurementType', 'characterization'],
+  var fieldNames = ['refPk', 'annotation__cancer__abbr', 'annotation__measurement_type', 'annotation__heritable', 'annotation__characterization'],
       hiddenForm = $('form#plus_one');
-  $('a.like-btn').click(function(){
+  $('a.like-btn').click(function(e){
+    e.preventDefault();
     var link = $(this);
     fieldNames.forEach(function(n){
       var val = link.attr(n);

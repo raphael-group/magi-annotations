@@ -4,22 +4,15 @@ from django.forms import ModelForm, Textarea
 
 # CONSTANTS
 mutationTypeChoices  = (('MS', 'Missense'), ('NS', 'Nonsense'), ('FSI', 'Frame-Shift Insertion'), ('IFD', 'In-Frame Deletion'), ('FSD', 'Frame-Shift Deletion'), ('IFI', 'In-Frame Insertion'))
-abbrToMutationType   = dict(mutationTypeChoices)
 mutationClassChoices = (('SNV', 'Single Nucleotide Variant'), ('indel', 'Small insertion/deletion'))
-abbrToMutationClass  = dict(mutationClassChoices)
 heritableChoices     = (('G', 'Germline'), ('S', 'Somatic'))
-abbrToHeritable      = dict(heritableChoices)
-heritableToAbbr      = dict( (v, k) for k, v in abbrToHeritable.iteritems() )
 referenceSourceChoices = (('C', 'Community'), ('DoCM', 'Database of Curated Mutations'), ('PMC Search', 'PubMed Central Search'))
-abbrToSource = dict(referenceSourceChoices)
 dbChoices = (('PMID', 'PubMed'), ('PMC', 'PubMed Central'))
-abbrToDb = dict(dbChoices)
 measurementChoices = (('WXS', 'Whole-Exome Sequencing'), ('WGS', 'Whole-Genome Sequencing'), ('TS', 'Targeted Sequencing'))
-abbrToMeasurement = dict(measurementChoices)
-measurementToAbbr = dict( (v, k) for k, v in abbrToMeasurement.iteritems() )
 characterizationChoices = (('F', 'Functional'), ('O', 'Observational'))
-abbrToCharacterization = dict(characterizationChoices)
-characterizationToAbbr = dict( (v, k) for k, v in abbrToCharacterization.iteritems() )
+modelChoiceMappers = dict(measurement_type=dict(measurementChoices),
+                          characterization=dict(characterizationChoices),
+                          heritable=dict(heritableChoices))
 
 # Create your models here.
 class Cancer(models.Model):

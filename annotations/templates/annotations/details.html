@@ -69,7 +69,7 @@ Annotations for {{ mutation.gene }} ({{ mutation.original_amino_acid}}{{ mutatio
     <table class='table table-striped'>
       <tr><th>Last Edited</th><th>Cancer</th><th>Heritable</th><th>Measurement Type</th><th>Characterization</th><th>Comment</th></tr>
       {% for A in annotations %}
-      <tr style='{% if A.user.pk == user.pk %}background:lightyellow;{% endif %}'>
+      <tr style='{% if user.is_authenticated and A.user.pk == user.pk %}background:lightyellow;{% endif %}'>
         <td>{{ A.last_edited }}</td>
         <td>{{ A.cancer|default:'Unknown'}}</td>
         <td>{{ A.get_heritable_display|default:'Unknown'}}</td>

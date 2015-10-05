@@ -3,59 +3,46 @@ from django.http import HttpResponse
 from .models import *
 from django.db.models import Count
 from django.contrib.auth.decorators import login_required
+from collections import defaultdict
 
 # Create your views here.
 def index(request):
     return HttpResponse("Hello, world. You're at the annotations index.")
 
 def gene(request, gene_name):
-    # Get all the references for this gene name
-    references  = Reference.objects.filter(mutation__gene__iexact=gene_name).order_by('identifier').order_by('mutation__locus')
+    # List of fields we want to display for our references
+    fields = ['mutation__mutation_class', 'mutation__mutation_type',
+              'mutation__locus', 'mutation__original_amino_acid',
+              'mutation__new_amino_acid', 'pk', 'identifier', 'db', 'source',
+              'annotation__heritable', 'annotation__measurement_type',
+              'annotation__characterization', 'annotation__cancer__abbr', 'annotation__user_id']
 
-    # Create a "summarized" list of annotations for each reference,
-    # counting the number of distinct values for the cancer, heritable,
-    # measurement_type, and characterization fields
-    annotations = []
-    for r in references:
-        # Load the reference's annotations
-        subannotations = Annotation.objects.filter(reference=r.pk)
-        N = len(subannotations)
+    # Values we want to count
+    annotation_fields = ['annotation__heritable', 'annotation__measurement_type',
+                         'annotation__characterization', 'annotation__cancer__abbr']
+    counters = [ Count(f) for f in annotation_fields ]
+    refs = Reference.objects.filter(mutation__gene__iexact=gene_name).values(*fields).annotate(*counters)
 
-        # Initialize a new "summarized" Annotation
-        A = { "mutation_class": r.mutation.mutation_class,
-              "mutation_type": r.mutation.get_mutation_type_display,
-              "locus": r.mutation.locus,
-              "oaa": r.mutation.original_amino_acid,
-              "naa": r.mutation.new_amino_acid,
-              "source": r.source,
-              "db": r.db,
-              "identifier": r.identifier,
-              "ref_pk": r.pk,
-              "user_annotated": any( a for a in subannotations if a.user == request.user ),
-              "no_annotations": len(subannotations) == 0
-        }
+    # For each value we want to count, merge the counts across references
+    pkToAnnotation = dict()
+    for ref in refs:
+        if ref['pk'] not in pkToAnnotation:
+            ref['user_annotated'] = False
+            ref['counter'] = dict( (f, defaultdict(int)) for f in annotation_fields)
+            ref['no_annotations'] = True
+            pkToAnnotation[ref['pk']] = ref
+        if request.user.is_authenticated() and request.user.pk == ref['annotation__user_id']:
+            pkToAnnotation[ref['pk']]['user_annotated'] = True
+        for f in annotation_fields:
+            if ref[f] == '' or ref[f] is None: continue
+            pkToAnnotation[ref['pk']]['counter'][f][ref[f]] += ref[f + '__count']
+            pkToAnnotation[ref['pk']]['no_annotations'] = False
 
-        # For each of our summary fields, record the count of each
-        # distinct value
-        fields = [('cancer__abbr', 'cancers', None),
-                   ('heritable', 'heritable', abbrToHeritable),
-                   ('measurement_type', 'measurement_type', None),
-                   ('characterization', 'characterization', abbrToCharacterization)]
-        for field, attr_name, mapper in fields:
-            counter = subannotations.values(field).annotate(count=Count(field)).order_by('-count')
-            def display_name(val):
-                if val == '' or val is None or mapper is None: return val
-                else: return mapper[val]
-            counter = [ dict(count=c['count'], val=display_name(c[field]), total=N) for c in counter ]
-            # Hack to make sure that all the counts total the same amount
-            totalCount = sum( c['count'] for c in counter )
-            if totalCount != N:
-                counter.append(dict(count=N-totalCount, val='', total=N))
-            A[attr_name] = counter
-        annotations.append( A )
+    # Sort the annotations
+    references = sorted(pkToAnnotation.values(), key=lambda r: (not r['user_annotated'], r['no_annotations'], r['mutation__locus']))
 
     # Render the view
-    context = dict(annotations=annotations, gene=gene_name)
+    context = dict(references=references, gene=gene_name, mapper=modelChoiceMappers, path=request.path)
     return render(request, 'annotations/gene.html', context)
 
 def details(request, ref_pk):
@@ -64,7 +51,7 @@ def details(request, ref_pk):
     annotations = Annotation.objects.filter(reference=ref)
 
     # Initialize the context
-    context = dict(mutation=ref.mutation, ref=ref, user=request.user, annotations=annotations)
+    context = dict(mutation=ref.mutation, ref=ref, user=request.user, annotations=annotations, path=request.path)
 
     # Retrieve the annotation for the current user (if necessary)
     if request.user.is_authenticated():
@@ -110,24 +97,22 @@ def plus_one(request, gene_name):
     ref   = Reference.objects.get(pk=refPk)
 
     # Parse the post request
-    def valueIfValid(D, key, mapper=None):
+    attrs = dict(reference=ref, user=request.user)
+    def valueIfValid(key, newKey):
         val = request.POST.get(key)
         if val == '' or val is None: return
-        elif mapper: D[key] = mapper[val]
-        else: D[key]=  val
+        else: attrs[newKey]=  val
 
-    attrs = dict(reference=ref, user=request.user)
-    valueIfValid(attrs, 'heritable', heritableToAbbr)
-    valueIfValid(attrs, 'measurementType', measurementToAbbr)
-    valueIfValid(attrs, 'characterization', characterizationToAbbr)
-    valueIfValid(attrs, 'cancer')
+    valueIfValid('annotation__heritable', 'heritable')
+    valueIfValid('annotation__measurement_type', 'measurement_type')
+    valueIfValid('annotation__characterization', 'characterization')
+    valueIfValid('annotation__cancer__abbr', 'cancer')
 
     # Find the specific
     if 'cancer' in attrs:
         attrs['cancer'] = Cancer.objects.get(abbr=attrs['cancer'])
 
     # Add a new annotation
-    ref = Reference.objects.get(pk=refPk)
     a   = Annotation(**attrs)
     a.save()
 
@@ -137,6 +122,6 @@ def plus_one(request, gene_name):
 @login_required
 def remove_annotation(request, gene_name, ref_pk):
     ref = Reference.objects.get(pk=ref_pk)
-    A = Annotation.objects.get(user=request.user, reference=ref)
+    A = Annotation.objects.all().filter(user=request.user, reference=ref)
     A.delete()
     return redirect('annotations:gene', gene_name=gene_name)
