@@ -29,7 +29,7 @@ DEBUG = os.environ.get('MAGI_PYTHON_ENV', 'development').lower() == 'development
 ALLOWED_HOSTS = []
 if 'MAGI_SITE_URL' in os.environ:
     ALLOWED_HOSTS += os.environ.get('MAGI_SITE_URL', '').split(',')
-print ALLOWED_HOSTS
+
 # Application definition
 
 INSTALLED_APPS = (
