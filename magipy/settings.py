@@ -25,11 +25,11 @@ SECRET_KEY = os.environ.get('MAGI_SECRET_KEY', '^i377a$-k4zce3e%yah$!p&n)yaj_qlx
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('MAGI_PYTHON_ENV', 'development').lower() == 'development'
 
-if not DEBUG: raise ValueError('MAGIPY in production mode is not fully implemented.')
+#if not DEBUG: raise ValueError('MAGIPY in production mode is not fully implemented.')
 ALLOWED_HOSTS = []
 if 'MAGI_SITE_URL' in os.environ:
-    ALLOWED_HOSTS.append( os.environ.get('MAGI_SITE_URL') )
-
+    ALLOWED_HOSTS += os.environ.get('MAGI_SITE_URL', '').split(',')
+print ALLOWED_HOSTS
 # Application definition
 
 INSTALLED_APPS = (
@@ -129,3 +129,4 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATIC_ROOT = os.environ.get('MAGI_STATIC_ROOT', '/var/www/magipy/static/')
