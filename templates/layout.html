@@ -21,20 +21,20 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/">MAGI</a>
+          <a class="navbar-brand" href="{% node_magi_url '/' referral_site %}">MAGI</a>
         </div>
         <div class="collapse navbar-collapse" id="magi-navbar-collapse">
           <div class="nav navbar-left">
             <div class="row">
               <div id="topNavList">
                 <ul class="nav navbar-nav">
-                  <li><a href="{% node_magi_url '/' %}" id="navbar-query-btn" class="qry-button">Query</a></li>
-                  <li><a href="{% node_magi_url '/upload' %}">Upload</a></li>
-                  <li><a href="{% node_magi_url '/datasets' %}">Datasets</a></li>
-                  <li><a href="{% node_magi_url '/cancers' %}">Cancers</a></li>
-                  <li><a href="{% node_magi_url '/#db-chooser' %}" id="nav-instructions">Instructions</a></li>
-                  <li><a href="{% node_magi_url '/support' %}">Support</a></li>
-                  <li><a href="{% node_magi_url '/' %}">Feedback</a></li>
+                  <li><a href="{% node_magi_url '/' referral_site %}" id="navbar-query-btn" class="qry-button">Query</a></li>
+                  <li><a href="{% node_magi_url '/upload' referral_site %}">Upload</a></li>
+                  <li><a href="{% node_magi_url '/datasets' referral_site %}">Datasets</a></li>
+                  <li><a href="{% node_magi_url '/cancers' referral_site %}">Cancers</a></li>
+                  <li><a href="{% node_magi_url '/#db-chooser' referral_site %}" id="nav-instructions">Instructions</a></li>
+                  <li><a href="{% node_magi_url '/support' referral_site %}">Support</a></li>
+                  <li><a href="{% node_magi_url '/' referral_site %}">Feedback</a></li>
                 </ul>
                 </div>
               </div>
@@ -65,13 +65,13 @@
       <p class="col-lg-4 text-left">Updated: October 5th, 2015</p>
       <p class="col-lg-4 text-center">Copyright 2014-2015. All rights reserved.</p>
       <ul id="more-info", class="col-lg-4 text-right">
-        <li><a href="{{ node_magi_url }}/acknowledgements">Acknowledgements</a></li>
-        <li><a href="{{ node_magi_url }}/support">Support</a></li>
+        <li><a href="{{ node_magi_url '/acknowledgements' referral_site %}">Acknowledgements</a></li>
+        <li><a href="{{ node_magi_url '/support' referral_site %}">Support</a></li>
       </ul>
       <ul id="even-more-info">
-        <li><a href="{% node_magi_url 'contact' %}">Contact</a></li>
-        <li><a href="{% node_magi_url '/privacy' %}" target="_new">Privacy</a></li>
-        <li><a href="{% node_magi_url '/terms' %}" target="_new">Terms</a></li>
+        <li><a href="{% node_magi_url 'contact' referral_site %}">Contact</a></li>
+        <li><a href="{% node_magi_url '/privacy' referral_site %}" target="_new">Privacy</a></li>
+        <li><a href="{% node_magi_url '/terms' referral_site %}" target="_new">Terms</a></li>
       </ul>
     </div>
   </footer>

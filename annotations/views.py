@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.template.response import SimpleTemplateResponse, TemplateResponse
 from .models import *
 from django.db.models import Count
 from django.contrib.auth.decorators import login_required
@@ -42,8 +43,14 @@ def gene(request, gene_name):
     references = sorted(pkToAnnotation.values(), key=lambda r: (not r['user_annotated'], r['no_annotations'], r['mutation__locus']))
 
     # Render the view
-    context = dict(references=references, gene=gene_name, mapper=modelChoiceMappers, path=request.path)
-    return render(request, 'annotations/gene.html', context)
+    print "in view:"
+    print request.referral_site
+    context = dict(references=references, 
+                   gene=gene_name, 
+                   mapper=modelChoiceMappers, 
+                   path=request.path)
+    
+    return TemplateResponse(request, 'annotations/gene.html', context=context)
 
 def details(request, ref_pk):
     # Retrieve the annotations for this reference
@@ -61,7 +68,7 @@ def details(request, ref_pk):
             context['user_annotation'] = user_annotation
         except Annotation.DoesNotExist:
             context['annotation_form'] = AnnotationForm()
-    return render(request, 'annotations/details.html', context)
+    return TemplateResponse(request, 'annotations/details.html', context=context)
 
 @login_required
 def save(request, annotation_pk=None):
