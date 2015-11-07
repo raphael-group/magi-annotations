@@ -37,6 +37,9 @@ class Mutation(models.Model):
     def __unicode__(self):
         return '{}:{}{}{} ({} {})'.format(self.gene, self.original_amino_acid, self.locus, self.new_amino_acid, self.mutation_type, self.mutation_class)
 
+    def full_change(self):
+        return self.original_amino_acid + str(self.locus) + self.new_amino_acid
+
 class Reference(models.Model):
     identifier = models.CharField(max_length=30)
     db = models.CharField(max_length=30, choices=dbChoices)
@@ -61,6 +64,21 @@ class Annotation(models.Model):
 
     def __unicode__(self):
         return 'Annotation: ' + unicode(self.reference)
+
+    def heritable_mapped(self):
+        if self.heritable:
+            return heritableChoices[self.heritable]
+        return "Unknown"
+
+    def measurement_mapped(self):
+        if self.measurement_type:
+            return measurementChoices[self.measurement_type]
+        return "Unknown"
+
+    def characterization_mapped(self):
+        if self.characterization:
+            return characterizationChoices[self.characterization]
+        return "Unknown"
 
 class AnnotationForm(ModelForm):
     class Meta:

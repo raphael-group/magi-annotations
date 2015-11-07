@@ -1,9 +1,46 @@
 {% extends "layout.html" %}
+{% load annotation_tags %}
 {% block title %}MAGI :: User {{ user.get_full_name|default:user.username }}{% endblock %}
 {% block content %}
 <h3>Account page for {{user.get_full_name|default:user.username}}</h3>
 <table class='table'>
-  <tr><th>Attribute</th><th>Value</th></tr>
+  <thead><tr><th>Attribute</th><th>Value</th></tr></thead>
   <tr><td>Email</td><td>{{ user.email }}</td></tr>
 </table>
+<div id="user-source-annotations">
+  <h4> Your Source Annotations </h4>
+  <table class='table table-striped'>
+    <thead><tr style='background:#d3d3d3'>
+	<th>Class</th>
+	<th>Type</th>
+	<th style='border-right:1px solid #000'>Protein Sequence Change</th>
+	<th>Reference</th>
+	<th>Source</th>
+	<th>Cancer</th>
+	<th>Somatic?</th>
+	<th>Measurement Type</th>
+	<th>Characterization</th>
+	<th>Actions</th>
+      </tr></thead>
+    <tbody>
+    {% for sourceAnno in user.annotation_set.all %}
+    <tr><td>{{ sourceAnno.reference.mutation.gene }}</td>
+      <td>{{ sourceAnno.reference.mutation.locus }}</td>
+      <td>{{ sourceAnno.reference.mutation.full_change }}</td>
+      <td style='border-right:1px solid #000'>{% ref_link sourceAnno.reference.identifier sourceAnno.reference.db %}</td>
+      <td>{{ sourceAnno.source }}</td>
+      <td>{{ sourceAnno.cancer }}</td>
+      <td>{{ sourceAnno.heritable_mapped }}</td>
+      <td>{{ sourceAnno.measurement_mapped }}</td>
+      <td>{{ sourceAnno.characterization_mapped }}</td>
+      <td><ul>
+	  <li><a href='{% url 'annotations:details' ref_pk=sourceAnno.reference.pk %}'>Edit</a></li>
+	  <li><a href='{% url 'annotations:remove_annotation' gene_name=sourceAnno.reference.mutation.gene ref_pk=sourceAnno.reference.pk %}'>Remove</a></li>
+    </ul></td></tr>
+    {% empty %}
+    <p> You have not annotated any reference mutations. </p>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}
