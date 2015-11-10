@@ -66,17 +66,17 @@ class Annotation(models.Model):
         return 'Annotation: ' + unicode(self.reference)
 
     def heritable_mapped(self):
-        if self.heritable:
+        if self.heritable in heritableChoices:
             return heritableChoices[self.heritable]
         return "Unknown"
 
     def measurement_mapped(self):
-        if self.measurement_type:
+        if self.measurement_type in measurementChoices:
             return measurementChoices[self.measurement_type]
         return "Unknown"
 
     def characterization_mapped(self):
-        if self.characterization:
+        if self.characterization in characterizationChoices:
             return characterizationChoices[self.characterization]
         return "Unknown"
 
