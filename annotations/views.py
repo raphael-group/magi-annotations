@@ -43,8 +43,6 @@ def gene(request, gene_name):
     references = sorted(pkToAnnotation.values(), key=lambda r: (not r['user_annotated'], r['no_annotations'], r['mutation__locus']))
 
     # Render the view
-    print "in view:"
-    print request.referral_site
     context = dict(references=references, 
                    gene=gene_name, 
                    mapper=modelChoiceMappers, 

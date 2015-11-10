@@ -4,6 +4,7 @@ register = template.Library()
 
 @register.simple_tag
 def node_magi_url(path, referer):
+    # use the domain of the referring magi instance
     if referer:
         return "{}{}".format(referer, path)
     else:
