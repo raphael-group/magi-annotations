@@ -93,5 +93,5 @@ class Annotation(models.Model):
 class AnnotationForm(ModelForm):
     class Meta:
         model = Annotation
-        fields = ['heritable', 'cancer', 'measurement_type', 'characterization', 'comment']
+        fields = [ 'cancer', 'heritable', 'measurement_type', 'characterization', 'comment']
         widgets = { 'comment': Textarea(attrs={'cols': 40, 'rows': 3, 'class': 'form-control'})}

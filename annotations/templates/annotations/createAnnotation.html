@@ -60,6 +60,18 @@ Create a new referenced mutation and annotate it
 				{{ anno_form.0.cancer|addclass:'form-control' }}
 			</div>
 			<div class="form-group">
+				<label for={{ anno_form.heritable.id_for_label }}>Heritability</label>
+				{{ anno_form.0.heritable|addclass:'form-control' }}
+			</div>
+			<div class="form-group">
+				<label for={{ anno_form.measurement_type.id_for_label }}>Measurement Type</label>
+				{{ anno_form.0.measurement_type|addclass:'form-control' }}
+			</div>
+			<div class="form-group">
+				<label for={{ anno_form.characterization.id_for_label }}>Characterization</label>
+				{{ anno_form.0.characterization|addclass:'form-control' }}
+			</div>
+					<div class="form-group">
 				<label for={{ anno_form.comment.id_for_label }}>Comment</label>
 				{{ anno_form.0.comment|addclass:'form-control' }}
 			</div>
