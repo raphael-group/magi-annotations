@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+{% block title %}
+Create a new referenced mutation and annotate it
+{% endblock %}
+{% block content %}
+{% load annotation_filters %}
+{% load annotation_tags %}
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+<!-- Add/Edit annotation panel  -->
+{% if user.is_authenticated %}
+{% url 'annotations:saveMutation' as post_url %}
+<form method='POST' action='{{ post_url }}'>
+	{% csrf_token %}
+	{{ reference_form.management_form }}
+	{{ anno_form.management_form }}
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">
+				Provide a referenced mutation
+			</h3>
+		</div>
+		<div class='panel-body'>
+			<div class="form-group">
+				<label for={{ mutation_form.gene.id_for_label }}>Gene</label>
+				{{ mutation_form.gene|addclass:'form-control' }}
+			</div>
+			<div class="form-group">
+				<label for={{ mutation_form.mutation_class.id_for_label }}>Mutation class</label>
+				{{ mutation_form.mutation_class|addclass:'form-control' }}
+			</div>
+
+			<div class="form-group">
+				<label for={{ mutation_form.mutation_type.id_for_label }}>Mutation type</label>
+				{{ mutation_form.mutation_type|addclass:'form-control' }}
+			</div>
+
+			<div class="form-group">
+				<label>Protein sequence change </label>
+				{{ mutation_form.original_amino_acid }}
+				{{ mutation_form.locus }}
+				{{ mutation_form.new_amino_acid }}
+			</div>
+
+			<div class="form-group">
+				<label for={{ reference_form.0.identifier.id_for_label }}>Reference Identifier</label>
+				{{ reference_form.0.db|addclass:'form-control' }}
+				{{ reference_form.0.identifier|addclass:'form-control' }}
+			</div>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h4 aria-expanded="true" data-toggle="collapse" data-target="#annotationFormDiv" style="cursor:pointer" id="annoSubForm" class="panel-title">
+				Add annotations to the reference<span style="float:right">[+]</span>
+			</h4>
+		</div>
+		<div style="" aria-expanded="true" id="annotationFormDiv" class="panel-collapse collapse in">
+			<div class="form-group">
+				<label for={{ anno_form.cancer.id_for_label }}>Cancer</label>
+				{{ anno_form.0.cancer|addclass:'form-control' }}
+			</div>
+			<div class="form-group">
+				<label for={{ anno_form.comment.id_for_label }}>Comment</label>
+				{{ anno_form.0.comment|addclass:'form-control' }}
+			</div>
+		</div>
+	</div>
+	<button class='btn btn-primary'>Submit</button>
+</form>
+{% else %}
+You must <a href='{% url 'login' %}'>login</a> to add/edit mutation references.
+{% endif %}
+
+{% endblock %}
+{% block scripts %}
+<script type='text/javascript'>
+	$('.collapse').collapse();
+</script>
+{% endblock %}

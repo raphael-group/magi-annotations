@@ -4,6 +4,7 @@ from .models import *
 from django.db.models import Count
 from django.contrib.auth.decorators import login_required
 from collections import defaultdict
+from django.forms import inlineformset_factory
 
 # Create your views here.
 def index(request):
@@ -44,6 +45,44 @@ def gene(request, gene_name):
     # Render the view
     context = dict(references=references, gene=gene_name, mapper=modelChoiceMappers, path=request.path)
     return render(request, 'annotations/gene.html', context)
+
+# requirements: (needs preloading with url params)
+# (also needs to save across multiple forms, mutation, then annotation, then reference (cancer) first.)
+def createMutation(request):
+    # todo: Initialize the context (todo: try with fixed data)
+    context = dict(path=request.path, anno_form=AnnotationForm(), mutation_form=MutationForm(), reference_form=ReferenceForm())
+
+    return render(request, 'annotations/createAnnotation.html', context)
+
+# todo: nest post and get logic in same subroutine
+def saveMutation(request):
+    MutRefFormSet = inlineformset_factory(Mutation, Reference, form=ReferenceForm,extra=1)
+    RefAnnoFormSet = inlineformset_factory(Reference, Annotation, form=AnnotationForm, extra=1)
+    if request.method == 'GET':
+        context = dict(path=request.path,
+                       mutation_form=MutationForm(),
+                       reference_form=MutRefFormSet(),
+                       anno_form=RefAnnoFormSet())
+        return render(request, 'annotations/createAnnotation.html', context)
+
+    elif request.method == 'POST':
+        mutationForm = MutationForm(request.POST)
+        if mutationForm.is_valid():
+            mutation = mutationForm.save()
+
+            referenceFormSet = MutRefFormSet(request.POST, request.FILES, instance=mutation)
+            if referenceFormSet.is_valid():
+                references = referenceFormSet.save(commit=False) # list of references even though there's usually just 1
+                ref = references[0]
+                ref.mutation = mutation
+                ref.source = 'Community'
+                ref.save()
+
+                annotationFormSet = RefAnnoFormSet(request.POST, request.FILES, instance=ref)
+                if annotationFormSet.is_valid():
+                    annos = annotationFormSet.save()
+                    return redirect('annotations:gene', gene_name=mutation.gene)
+                # todo: handle non-valid cases
 
 def details(request, ref_pk):
     # Retrieve the annotations for this reference

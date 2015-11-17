@@ -40,6 +40,11 @@ class Mutation(models.Model):
     def full_change(self):
         return self.original_amino_acid + str(self.locus) + self.new_amino_acid
 
+class MutationForm(ModelForm):
+    class Meta:
+        model = Mutation
+        fields = ['gene','locus', 'original_amino_acid','new_amino_acid', 'mutation_type', 'mutation_class']
+
 class Reference(models.Model):
     identifier = models.CharField(max_length=30)
     db = models.CharField(max_length=30, choices=dbChoices)
@@ -50,6 +55,11 @@ class Reference(models.Model):
 
     def __unicode__(self):
         return '{} {} for {} ({})'.format(self.db, self.identifier, self.mutation, self.source)
+
+class ReferenceForm(ModelForm):
+    class Meta:
+        model = Reference
+        fields = ['db', 'mutation', 'identifier']
 
 class Annotation(models.Model):
     heritable        = models.CharField(max_length=8, choices=heritableChoices, blank=True)
