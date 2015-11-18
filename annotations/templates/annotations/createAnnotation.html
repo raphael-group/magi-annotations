@@ -55,26 +55,12 @@ Create a new referenced mutation and annotate it
 			</h4>
 		</div>
 		<div style="" aria-expanded="true" id="annotationFormDiv" class="panel-collapse collapse in">
+			{% for anno_form_field in anno_form.0.visible_fields %}
 			<div class="form-group">
-				<label for={{ anno_form.cancer.id_for_label }}>Cancer</label>
-				{{ anno_form.0.cancer|addclass:'form-control' }}
-			</div>
-			<div class="form-group">
-				<label for={{ anno_form.heritable.id_for_label }}>Heritability</label>
-				{{ anno_form.0.heritable|addclass:'form-control' }}
-			</div>
-			<div class="form-group">
-				<label for={{ anno_form.measurement_type.id_for_label }}>Measurement Type</label>
-				{{ anno_form.0.measurement_type|addclass:'form-control' }}
-			</div>
-			<div class="form-group">
-				<label for={{ anno_form.characterization.id_for_label }}>Characterization</label>
-				{{ anno_form.0.characterization|addclass:'form-control' }}
-			</div>
-					<div class="form-group">
-				<label for={{ anno_form.comment.id_for_label }}>Comment</label>
-				{{ anno_form.0.comment|addclass:'form-control' }}
-			</div>
+				{{ anno_form_field.label_tag }}
+				{{ anno_form_field|addclass:'form-control' }}
+				</div>
+			{% endfor %}
 		</div>
 	</div>
 	<button class='btn btn-primary'>Submit</button>

@@ -46,23 +46,25 @@ def gene(request, gene_name):
     context = dict(references=references, gene=gene_name, mapper=modelChoiceMappers, path=request.path)
     return render(request, 'annotations/gene.html', context)
 
-# requirements: (needs preloading with url params)
-# (also needs to save across multiple forms, mutation, then annotation, then reference (cancer) first.)
-def createMutation(request):
-    # todo: Initialize the context (todo: try with fixed data)
-    context = dict(path=request.path, anno_form=AnnotationForm(), mutation_form=MutationForm(), reference_form=ReferenceForm())
-
-    return render(request, 'annotations/createAnnotation.html', context)
-
-# todo: nest post and get logic in same subroutine
+@login_required
 def saveMutation(request):
-    MutRefFormSet = inlineformset_factory(Mutation, Reference, form=ReferenceForm,extra=1)
-    RefAnnoFormSet = inlineformset_factory(Reference, Annotation, form=AnnotationForm, extra=1)
+    MutRefFormSet = inlineformset_factory(Mutation, Reference, form=ReferenceForm,extra=1,can_delete=False)
+    RefAnnoFormSet = inlineformset_factory(Reference, Annotation, form=AnnotationForm, extra=1,can_delete=False)
     if request.method == 'GET':
+        initialMutation, initialReference, initialAnnotation = dict(), dict(), dict()
+        for field in request.GET: # convert cgi params to initialize model
+            # todo: have caners use abbrevs as natural key to resolve cancers from strings rather than pks
+            if field in MutationForm.Meta.fields:
+                initialMutation[field] = request.GET[field]
+            elif field in ReferenceForm.Meta.fields:
+                initialReference[field] = request.GET[field]
+            elif field in AnnotationForm.Meta.fields:
+                initialAnnotation[field] = request.GET[field]
+
         context = dict(path=request.path,
-                       mutation_form=MutationForm(),
-                       reference_form=MutRefFormSet(),
-                       anno_form=RefAnnoFormSet())
+                       mutation_form=MutationForm(initial=initialMutation),
+                       reference_form=MutRefFormSet(initial=[initialReference]),
+                       anno_form=RefAnnoFormSet(initial=[initialAnnotation]))
         return render(request, 'annotations/createAnnotation.html', context)
 
     elif request.method == 'POST':

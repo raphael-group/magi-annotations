@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ModelForm, Textarea
+from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext_lazy as _
 
 # CONSTANTS
 mutationTypeChoices  = (('MS', 'Missense'), ('NS', 'Nonsense'), ('FSI', 'Frame-Shift Insertion'), ('IFD', 'In-Frame Deletion'), ('FSD', 'Frame-Shift Deletion'), ('IFI', 'In-Frame Insertion'))
@@ -27,7 +29,7 @@ class Cancer(models.Model):
 class Mutation(models.Model):
     gene                = models.CharField(max_length=30)
     locus               = models.IntegerField('locus')
-    original_amino_acid = models.CharField(max_length=30)
+    original_amino_acid = models.CharField(max_length=30) # describes SNV
     new_amino_acid      = models.CharField(max_length=30)
     mutation_type       = models.CharField(max_length=15, choices=mutationTypeChoices)
     mutation_class      = models.CharField(max_length=15, choices=mutationClassChoices)
@@ -39,6 +41,12 @@ class Mutation(models.Model):
 
     def full_change(self):
         return self.original_amino_acid + str(self.locus) + self.new_amino_acid
+
+    def clean(self):
+        if self.locus <= 0:
+            raise ValidationError({'locus': _('Locus should be positive.')})
+        if original_amino_acid == new_amino_acid:
+            raise ValidationError({'new_amino_acid': _('New amino acid must be different from original.')})
 
 class MutationForm(ModelForm):
     class Meta:
@@ -62,7 +70,7 @@ class ReferenceForm(ModelForm):
         fields = ['db', 'mutation', 'identifier']
 
 class Annotation(models.Model):
-    heritable        = models.CharField(max_length=8, choices=heritableChoices, blank=True)
+    heritable        = models.CharField(max_length=8, choices=heritableChoices, blank=True, verbose_name="Heritability")
     cancer           = models.ForeignKey(Cancer, blank=True, null=True)
     measurement_type = models.CharField(max_length=30, choices=measurementChoices, blank=True)
     characterization = models.CharField(max_length=20, choices=characterizationChoices, blank=True)
