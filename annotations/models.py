@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ModelForm, Textarea
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.utils.translation import ugettext_lazy as _
 
 # CONSTANTS
@@ -45,13 +45,21 @@ class Mutation(models.Model):
     def clean(self):
         if self.locus <= 0:
             raise ValidationError({'locus': _('Locus should be positive.')})
-        if original_amino_acid == new_amino_acid:
+        if self.original_amino_acid == self.new_amino_acid:
             raise ValidationError({'new_amino_acid': _('New amino acid must be different from original.')})
+
+    class Meta:
+        unique_together = (("gene","locus","original_amino_acid","new_amino_acid","mutation_type","mutation_class"))
 
 class MutationForm(ModelForm):
     class Meta:
         model = Mutation
-        fields = ['gene','locus', 'original_amino_acid','new_amino_acid', 'mutation_type', 'mutation_class']
+        fields = ['gene','mutation_class', 'mutation_type', 'original_amino_acid', 'locus', 'new_amino_acid']
+        error_messages = {
+            NON_FIELD_ERRORS: {
+                'unique_together': "%(model_name)s is not unique.",
+                }
+            }
 
 class Reference(models.Model):
     identifier = models.CharField(max_length=30)
