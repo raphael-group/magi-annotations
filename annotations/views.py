@@ -48,22 +48,10 @@ def gene(request, gene_name):
 
 @login_required
 def saveMutation(request):
-    MutRefFormSet = inlineformset_factory(Mutation, Reference, form=ReferenceForm,extra=1,can_delete=False)
-    RefAnnoFormSet = inlineformset_factory(Reference, Annotation, form=AnnotationForm, extra=1,can_delete=False)
-
-    def saveReferenceAndAnno(mut):
-        referenceFormSet = MutRefFormSet(request.POST, request.FILES, instance=mut)
-        if referenceFormSet.is_valid(): # TODO: check references for redundancy
-            references = referenceFormSet.save(commit=False) # list of references even though there's usually just 1
-            ref = references[0]
-            ref.mutation = mut
-            ref.source = 'Community'
-            ref.save()
-
-            annotationFormSet = RefAnnoFormSet(request.POST, request.FILES, instance=ref)
-            if annotationFormSet.is_valid():
-                annos = annotationFormSet.save()
-                return redirect('annotations:gene', gene_name=mut.gene)
+    MutRefFormSet = inlineformset_factory(Mutation, Reference, form=ReferenceForm,
+                                          extra=1,can_delete=False)
+    RefAnnoFormSet = inlineformset_factory(Reference, Annotation, form=AnnotationForm,
+                                           extra=1,can_delete=False)
 
     if request.method == 'GET':
         initialMutation, initialReference, initialAnnotation = dict(), dict(), dict()
@@ -86,29 +74,41 @@ def saveMutation(request):
         mutationForm = MutationForm(request.POST)
         referenceFormSet = MutRefFormSet(request.POST, request.FILES)
         annotationFormSet = RefAnnoFormSet(request.POST, request.FILES)
+
+        validMutation = None
         if mutationForm.is_valid():
-            mutation = mutationForm.save()
-            return saveReferenceAndAnno(mutation)
+            validMutation = mutationForm.save()
+        elif mutationForm.non_field_errors().as_text() == "* Mutation is not unique.":
+            validMutation = Mutation.getExact(mutationForm.cleaned_data)
 
-        elif mutationForm.non_field_errors() and mutationForm.non_field_errors().as_text() == "* Mutation is not unique.":
-            # find the object with the same key
-            return saveReferenceAndAnno(retrieveExactMutation(mutationForm.cleaned_data))
-        else:
-            print mutationForm.non_field_errors().as_text()
-            context = dict(path=request.path,
-                           mutation_form = mutationForm,
-                           reference_form = referenceFormSet,
-                           anno_form = annotationFormSet)
-            return render(request, 'annotations/createAnnotation.html', context)
+        if validMutation:
+             # only the first reference form is important
+            referenceFormSet = MutRefFormSet(request.POST, request.FILES,
+                                             instance=validMutation)
+            refForm = referenceFormSet.extra_forms[0]
 
-def retrieveExactMutation(mutationDict):
-    return Mutation.objects.get(
-                gene=mutationDict['gene'],
-                mutation_type=mutationDict['mutation_type'],
-                mutation_class=mutationDict['mutation_class'],
-                locus=mutationDict['locus'],
-                original_amino_acid=mutationDict['original_amino_acid'],
-                new_amino_acid=mutationDict['new_amino_acid'])
+            validRef = None
+            if refForm.is_valid(): 
+                validRef = refForm.save(commit=False)
+                validRef.source = 'Community'
+                validRef.save()
+            elif refForm.non_field_errors().as_text() == "* Reference is not unique.":
+                validRef = Reference.getExact(refForm.cleaned_data)
+
+            if validRef:
+                annotationFormSet = RefAnnoFormSet(request.POST, request.FILES,
+                                                   instance=validRef)
+                if annotationFormSet.is_valid():
+                    annos = annotationFormSet.save()
+                    # todo: respond to ajax request instead
+                    return redirect('annotations:gene', gene_name=validMutation.gene)
+
+        # some save was invalid along the way
+        originalFormContext = dict(path=request.path,
+                                   mutation_form = mutationForm,
+                                   reference_form = referenceFormSet,
+                                   anno_form = annotationFormSet)
+        return render(request, 'annotations/createAnnotation.html', originalFormContext)
 
 def details(request, ref_pk):
     # Retrieve the annotations for this reference

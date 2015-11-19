@@ -48,6 +48,16 @@ class Mutation(models.Model):
         if self.original_amino_acid == self.new_amino_acid:
             raise ValidationError({'new_amino_acid': _('New amino acid must be different from original.')})
 
+    @staticmethod
+    def getExact(mutationDict):
+        return Mutation.objects.get(
+            gene=mutationDict['gene'],
+            mutation_type=mutationDict['mutation_type'],
+            mutation_class=mutationDict['mutation_class'],
+            locus=mutationDict['locus'],
+            original_amino_acid=mutationDict['original_amino_acid'],
+            new_amino_acid=mutationDict['new_amino_acid'])
+
     class Meta:
         unique_together = (("gene","locus","original_amino_acid","new_amino_acid","mutation_type","mutation_class"))
 
@@ -72,10 +82,25 @@ class Reference(models.Model):
     def __unicode__(self):
         return '{} {} for {} ({})'.format(self.db, self.identifier, self.mutation, self.source)
 
+    @staticmethod
+    def getExact(refDict):
+        return Reference.objects.get(
+            identifier=refDict['identifier'],
+            db=refDict['db'],
+            mutation=refDict['mutation'].pk)
+
+    class Meta:
+        unique_together = (('identifier', 'db', 'mutation'))
+
 class ReferenceForm(ModelForm):
     class Meta:
         model = Reference
         fields = ['db', 'mutation', 'identifier']
+        error_messages = {
+            NON_FIELD_ERRORS: {
+                'unique_together': "%(model_name)s is not unique.",
+                }
+            }
 
 class Annotation(models.Model):
     heritable        = models.CharField(max_length=8, choices=heritableChoices, blank=True, verbose_name="Heritability")
