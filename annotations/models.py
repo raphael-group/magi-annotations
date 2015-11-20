@@ -19,7 +19,7 @@ modelChoiceMappers = dict(measurement_type=dict(measurementChoices),
 # Create your models here.
 class Cancer(models.Model):
     name        = models.CharField(max_length=100)
-    abbr        = models.CharField(max_length=10)
+    abbr        = models.CharField(max_length=10, primary_key=True)
     color       = models.CharField(max_length=7)
     last_edited = models.DateField(auto_now=True)
     created_on  = models.DateField(auto_now_add=True)
