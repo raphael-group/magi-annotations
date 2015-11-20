@@ -154,7 +154,13 @@ class Interaction(models.Model):
         return unicode(self.source) +  "->" +  unicode(self.target)
 
 class InteractionReference(models.Model):
-    identifier = models.CharField(max_length=20) # all references are PMIDs for the time being
+    identifier = models.CharField(max_length=40) # all references are PMIDs for the time being
     interaction = models.ForeignKey(Interaction)
     def __unicode__(self):
         return unicode(self.identifier)
+
+class InteractionForm(ModelForm):
+    reference_identifier = models.CharField(max_length=40)
+    class Meta:
+        model = Interaction
+        fields = ['source', 'target']

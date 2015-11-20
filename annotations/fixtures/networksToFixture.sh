@@ -1,0 +1,1 @@
+python annotations/fixtures/networksToFixture.py -o annotations/fixtures/all -nf ../magi/data/ppis/hint-annotated.tsv ../magi/data/ppis/hprd-annotated.tsv ../magi/data/ppis/iref9-annotated.tsv ../magi/data/ppis/multinet.tsv
