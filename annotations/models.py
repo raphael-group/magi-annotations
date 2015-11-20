@@ -136,3 +136,25 @@ class AnnotationForm(ModelForm):
         model = Annotation
         fields = [ 'cancer', 'heritable', 'measurement_type', 'characterization', 'comment']
         widgets = { 'comment': Textarea(attrs={'cols': 40, 'rows': 3, 'class': 'form-control'})}
+
+# todo: link mutations to genes
+class Gene(models.Model):
+    name = models.CharField(max_length=30, primary_key = True)
+    chromosome = models.SmallIntegerField(null = True)
+    locus = models.IntegerField(null = True)
+    def __unicode__(self):
+        return unicode(self.name)
+
+# protein-protein interactions
+class Interaction(models.Model):
+    source = models.ForeignKey(Gene, related_name='source')
+    target = models.ForeignKey(Gene, related_name='target')
+    input_source = models.CharField(max_length=25)
+    def __unicode__(self):
+        return unicode(self.source) +  "->" +  unicode(self.target)
+
+class InteractionReference(models.Model):
+    identifier = models.CharField(max_length=20) # all references are PMIDs for the time being
+    interaction = models.ForeignKey(Interaction)
+    def __unicode__(self):
+        return unicode(self.identifier)
