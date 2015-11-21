@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.forms import ModelForm, Textarea
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.utils.translation import ugettext_lazy as _
+from django import forms
 
 # CONSTANTS
 mutationTypeChoices  = (('MS', 'Missense'), ('NS', 'Nonsense'), ('FSI', 'Frame-Shift Insertion'), ('IFD', 'In-Frame Deletion'), ('FSD', 'Frame-Shift Deletion'), ('IFI', 'In-Frame Insertion'))
@@ -150,6 +151,7 @@ class Interaction(models.Model):
     source = models.ForeignKey(Gene, related_name='source')
     target = models.ForeignKey(Gene, related_name='target')
     input_source = models.CharField(max_length=25)
+#    user = models.ForeignKey(User, null = True)
     def __unicode__(self):
         return unicode(self.source) +  "->" +  unicode(self.target)
 
@@ -160,7 +162,9 @@ class InteractionReference(models.Model):
         return unicode(self.identifier)
 
 class InteractionForm(ModelForm):
-    reference_identifier = models.CharField(max_length=40)
+    reference_identifier = forms.CharField(max_length=40)
+    # todo: how to make this a widget?
     class Meta:
         model = Interaction
         fields = ['source', 'target']
+        # todo: sortable, editable field listings

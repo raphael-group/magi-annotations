@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import *
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.contrib.auth.decorators import login_required
 from collections import defaultdict
 from django.forms import inlineformset_factory
@@ -190,3 +190,50 @@ def remove_annotation(request, gene_name, ref_pk):
     A = Annotation.objects.all().filter(user=request.user, reference=ref)
     A.delete()
     return redirect('annotations:gene', gene_name=gene_name)
+
+def list_interactions(request, gene_names):
+    # if there is only one, list all, else list only those included
+    gene_list = gene_names.split(',')
+    if len(gene_list) > 1:
+        interxns = Interaction.objects.filter(source__in=gene_list, target__in=gene_list)
+    elif len(gene_list) == 1:
+        gene = gene_names
+        interxns = Interaction.objects.filter(Q(source=gene) | Q(target=gene) )
+
+    context = dict(interactions = interxns,
+                   gene_list = gene_list,
+                   path=request.path,
+                   user=request.user)
+
+    return render(request, 'annotations/interactions.html', context)
+
+@login_required
+def add_interactions(request):
+    if request.method == 'GET':
+        context = dict(path = request.path,
+                       user = request.user,
+                       interaction_form = InteractionForm())
+        return render(request, 'annotations/add_interaction.html', context)
+
+    elif request.method == 'POST':
+        interaction_form = InteractionForm(request.POST)
+        if interaction_form.is_valid():
+            interxn = interaction_form.save(commit = False)
+            interxn.input_source = 'Community'
+            interxn.save()
+
+            # todo: handle non-unique interactions
+            # todo: if the gene is not known, then insert it?
+
+            ref_id = interaction_form.cleaned_data['reference_identifier']
+            if ref_id:
+                attached_ref = InteractionReference(identifier=ref_id,
+                                                    interaction = interxn)
+                attached_ref.save()
+                # todo: also make editable, alphabetizable fields
+                return redirect('annotations:list_interactions', interxn.source.name + ',' + interxn.target.name)
+
+    return render(request, 'annotations/add_interaction.html',
+                  dict(path = request.path,
+                       user = request.user,
+                       interaction_form = interaction_form))
