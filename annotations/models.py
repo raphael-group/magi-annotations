@@ -152,7 +152,6 @@ class Interaction(models.Model):
     source = models.ForeignKey(Gene, related_name='source')
     target = models.ForeignKey(Gene, related_name='target')
     input_source = models.CharField(max_length=25)
-    user = models.ForeignKey(User, null = True)
     def __unicode__(self):
         return unicode(self.source) +  "->" +  unicode(self.target)
 
@@ -169,9 +168,19 @@ class InteractionReference(models.Model):
     # all references are PMIDs for the time being
     identifier = models.CharField(max_length=40) 
     interaction = models.ForeignKey(Interaction)
+    user = models.ForeignKey(User, null = True)
     def __unicode__(self):
         return unicode(self.identifier)
 
+    class Meta:
+        unique_together = (("identifier", "interaction"))
+
+class InteractionVote:
+    user = models.ForeignKey(User, null = True)
+    reference = models.ForeignKey(InteractionReference)
+    class Meta:
+        unique_together = (("user", "reference"))
+    
 class InteractionForm(ModelForm):
     reference_identifier = forms.CharField(max_length=40)
     class Meta:

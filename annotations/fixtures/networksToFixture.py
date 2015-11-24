@@ -38,7 +38,7 @@ for network_file in args.network_files:
             interactions.append(interxn)
 
             if PMIDlist:
-                for pmid in PMIDlist.split(','):
+                for pmid in set(PMIDlist.split(',')):
                     ref = dict(model='annotations.interactionreference', pk=refCounter, fields = dict(
                         identifier = pmid,
                         interaction = idx

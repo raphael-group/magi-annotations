@@ -221,7 +221,6 @@ def add_interactions(request):
         interxn = []
         if interaction_form.is_valid():
             interxn = interaction_form.save(commit = False)
-            interxn.user = request.user
             interxn.save()
         elif interaction_form.non_field_errors().as_text() == '* Interaction is not unique.':
             interxn = Interaction.getExact(interaction_form.cleaned_data)
@@ -231,10 +230,15 @@ def add_interactions(request):
             # this is an issue only when editable fields are made
             ref_id = interaction_form.cleaned_data['reference_identifier']
             if ref_id:
-                attached_ref = InteractionReference(identifier=ref_id,
-                                                    interaction = interxn)
-                attached_ref.save()
-                return redirect('annotations:list_interactions', interxn.source.name + ',' + interxn.target.name)
+                # look for an existing reference first
+                if not InteractionReference.objects.filter(identifier = ref_id,
+                                                           interaction = interxn):
+                    attached_ref = InteractionReference(identifier=ref_id,
+                                                    interaction = interxn,
+                                                    user = request.user)                
+                    attached_ref.save()
+
+            return redirect('annotations:list_interactions', interxn.source.name + ',' + interxn.target.name)
             
         return render(request, 'annotations/add_interaction.html',
                       dict(path = request.path,
