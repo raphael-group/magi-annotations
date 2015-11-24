@@ -4,6 +4,7 @@ from django.forms import ModelForm, Textarea
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.utils.translation import ugettext_lazy as _
 from django import forms
+from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 
 # CONSTANTS
 mutationTypeChoices  = (('MS', 'Missense'), ('NS', 'Nonsense'), ('FSI', 'Frame-Shift Insertion'), ('IFD', 'In-Frame Deletion'), ('FSD', 'Frame-Shift Deletion'), ('IFI', 'In-Frame Insertion'))
@@ -151,20 +152,38 @@ class Interaction(models.Model):
     source = models.ForeignKey(Gene, related_name='source')
     target = models.ForeignKey(Gene, related_name='target')
     input_source = models.CharField(max_length=25)
-#    user = models.ForeignKey(User, null = True)
+    user = models.ForeignKey(User, null = True)
     def __unicode__(self):
         return unicode(self.source) +  "->" +  unicode(self.target)
 
+    class Meta:
+        unique_together = (("source", "target", "input_source"))
+
+    @staticmethod
+    def getExact(inter_dict):
+        return Interaction.objects.get(source = inter_dict['source'],
+                                       target = inter_dict['target'],
+                                       input_source = inter_dict['input_source'])
+    
 class InteractionReference(models.Model):
-    identifier = models.CharField(max_length=40) # all references are PMIDs for the time being
+    # all references are PMIDs for the time being
+    identifier = models.CharField(max_length=40) 
     interaction = models.ForeignKey(Interaction)
     def __unicode__(self):
         return unicode(self.identifier)
 
 class InteractionForm(ModelForm):
     reference_identifier = forms.CharField(max_length=40)
-    # todo: how to make this a widget?
     class Meta:
         model = Interaction
-        fields = ['source', 'target']
+        fields = ['source', 'target', 'input_source']
+        widgets = {'input_source': forms.HiddenInput()}
+        
         # todo: sortable, editable field listings
+        # see https://pypi.python.org/pypi/django-bootstrap-typeahead/1.1.5 and install django-bootsrap typeahead
+        error_messages = {
+            NON_FIELD_ERRORS: {
+                'unique_together': '%(model_name)s is not unique.'
+            }
+        }
+            

@@ -210,30 +210,33 @@ def list_interactions(request, gene_names):
 @login_required
 def add_interactions(request):
     if request.method == 'GET':
+        base_form =  InteractionForm(initial = {'input_source': 'Community'})
         context = dict(path = request.path,
                        user = request.user,
-                       interaction_form = InteractionForm())
+                       interaction_form = base_form)
         return render(request, 'annotations/add_interaction.html', context)
 
     elif request.method == 'POST':
         interaction_form = InteractionForm(request.POST)
+        interxn = []
         if interaction_form.is_valid():
             interxn = interaction_form.save(commit = False)
-            interxn.input_source = 'Community'
+            interxn.user = request.user
             interxn.save()
-
-            # todo: handle non-unique interactions
+        elif interaction_form.non_field_errors().as_text() == '* Interaction is not unique.':
+            interxn = Interaction.getExact(interaction_form.cleaned_data)
+                       
+        if interxn:
             # todo: if the gene is not known, then insert it?
-
+            # this is an issue only when editable fields are made
             ref_id = interaction_form.cleaned_data['reference_identifier']
             if ref_id:
                 attached_ref = InteractionReference(identifier=ref_id,
                                                     interaction = interxn)
                 attached_ref.save()
-                # todo: also make editable, alphabetizable fields
                 return redirect('annotations:list_interactions', interxn.source.name + ',' + interxn.target.name)
-
-    return render(request, 'annotations/add_interaction.html',
-                  dict(path = request.path,
-                       user = request.user,
-                       interaction_form = interaction_form))
+            
+        return render(request, 'annotations/add_interaction.html',
+                      dict(path = request.path,
+                           user = request.user,
+                           interaction_form = interaction_form))

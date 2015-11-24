@@ -8,5 +8,4 @@ def addclass(value, arg):
 
 @register.filter(name='has_errors')
 def has_errors(form):
-    # handles forms and formsets too
     return len(form.errors) > 0 and not isinstance(form.errors, list)

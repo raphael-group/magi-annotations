@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+{% load annotation_tags %}
+{% block title %}Protein-protein interactions for {{ gene_list|join:"," }}{% endblock %}
+{% block content %}
+<h3>Protein-protein interactions for {{ gene_list|join:"," }}</h3>
+<br/>
+<table class='table table-striped'>
+  <tr style='background:#d3d3d3'>
+    <th>Source</th>
+    <th>Target</th>
+    <th style='border-right:1px solid #000'>Network</th>
+    <th>Reference</th>
+ {#    <th>Source</th> #}
+    <th>Annotate</th>
+  </tr>
+  {% for interxn in interactions %}
+  <tr>
+      <td>{{ interxn.source }}</td>
+      <td>{{ interxn.target }}</td>
+      <td style='border-right:1px solid #000'>{{ interxn.input_source }}</td>
+      <td>
+	      {% for ref in interxn.interactionreference_set.all %}
+	      {% ref_link ref.identifier 'PMID' %}
+	      {% if not forloop.last %},{% endif%}
+	      {% empty %}
+	      None
+	      {% endfor %}
+      </td>
+      {# <td>None</td> #}
+      <td>
+	      {% if user %}
+	      <ul style='padding-left:12px'>
+		      <li>Upvote</li>
+		      <li>Downvote</li>
+	      </ul>
+	      {% endif %}        
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan='6' style='text-align:center'>Sorry, no interactions for {{ gene_list|join:"," }}.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}
+{% block scripts %}
+<script type='text/javascript'>
+  // Activate tooltips
+  $(function(){ $('span.tooltip-toggle').tooltip() });
+
+  // Perform gene search
+  $('button#geneSearch').click(function(e){
+    e.preventDefault();
+    var geneName = $('input#geneName').val();
+    if (geneName == ''){
+      alert('Please enter a gene name.');
+    } else {
+      window.location = '/annotations/' + geneName;
+    }
+  });
+
+  // Like buttons
+  var fieldNames = ['refPk', 'annotation__cancer__abbr', 'annotation__measurement_type', 'annotation__heritable', 'annotation__characterization'],
+      hiddenForm = $('form#plus_one');
+  $('a.like-btn').click(function(e){
+    e.preventDefault();
+    var link = $(this);
+    fieldNames.forEach(function(n){
+      var val = link.attr(n);
+      if (val != '') hiddenForm.children('#' + n).val(val);
+    });
+    hiddenForm.submit();
+  });
+</script>
+{% endblock %}
