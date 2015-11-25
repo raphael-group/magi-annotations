@@ -62,7 +62,6 @@ hiddenForm = $('form#vote');
 		  e.preventDefault();
 		  var link = $(this);
 		  hiddenForm.children('#refId').val(link.attr('refId'));
-		  console.log(link.hasClass('upvote'));
 		  hiddenForm.children('#is_positive').val(link.hasClass('upvote'));
 		  hiddenForm.submit();
 	  });

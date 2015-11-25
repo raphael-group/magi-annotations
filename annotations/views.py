@@ -248,7 +248,6 @@ def add_interactions(request):
 
 @login_required
 def vote_interaction_ref(request):
-    # add votes on interactions - should always be pos
     if request.method == 'POST':
         this_ref = InteractionReference.objects.get(id=request.POST.get('refId'));
         this_interxn = this_ref.interaction;
@@ -265,5 +264,13 @@ def vote_interaction_ref(request):
             existing_vote.is_positive = vote_direction
             existing_vote.save()
 
-    # redirect to the referring page
-    return redirect('annotations:list_interactions', this_interxn.source.name + ',' + this_interxn.target.name)
+            # todo: send json redirect or return to the referring page
+        return redirect('annotations:list_interactions', this_interxn.source.name + ',' + this_interxn.target.name)
+
+@login_required
+def remove_interaction_vote(request, vote_id):
+    this_vote = InteractionVote.objects.get(id=vote_id)
+    if request.user == this_vote.user:
+        this_vote.delete()
+    # todo: send json redirect or return to the referring page
+    return redirect('profile')

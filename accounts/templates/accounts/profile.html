@@ -42,5 +42,28 @@
     {% endfor %}
     </tbody>
   </table>
+<div id="user-interactions-votes">
+	<h4> Your Interaction Votes </h4>
+	<table class='table table-striped'>
+		<thead><tr style='background:#d3d3d3'>
+			<th>Source</th>
+			<th style='border-right:1px solid #000'>Target</th>
+			<th>Reference</th>
+			<th>Vote</th>
+			<th>Delete?</th>
+		</tr></thead>
+		<tbody>
+			{% for vote in user.interactionvote_set.all %} <tr>
+			<td>{{ vote.reference.interaction.source }}</td>
+			<td style='border-right:1px solid #000'>{{ vote.reference.interaction.target }}</td>
+			<td>{% ref_link vote.reference.identifier 'PMID' %}</td>
+			<td>{{ vote.is_positive|yesno }}</td>
+			<td> <a href="{% url 'annotations:remove_interaction_vote' vote.id %}"'>Delete</td>
+			</tr>
+			{% empty %}
+			<p> You have not annotated any reference mutations. </p>
+			{% endfor %}
+		</tbody>
+	</table>
 </div>
 {% endblock %}
