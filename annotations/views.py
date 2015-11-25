@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .models import *
 from django.db.models import Count, Q
+from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from collections import defaultdict
 from django.forms import inlineformset_factory
@@ -244,3 +245,25 @@ def add_interactions(request):
                       dict(path = request.path,
                            user = request.user,
                            interaction_form = interaction_form))
+
+@login_required
+def vote_interaction_ref(request):
+    # add votes on interactions - should always be pos
+    if request.method == 'POST':
+        this_ref = InteractionReference.objects.get(id=request.POST.get('refId'));
+        this_interxn = this_ref.interaction;
+
+        vote_direction = request.POST.get('is_positive') == 'true'
+        vote = InteractionVote(user = request.user,
+                               reference = this_ref,
+                               is_positive = vote_direction)
+        try:
+            vote.save()
+        except IntegrityError as err: # todo: check specifically for duplicate error
+            existing_vote = InteractionVote.objects.get(user = request.user,
+                               reference = this_ref)
+            existing_vote.is_positive = vote_direction
+            existing_vote.save()
+
+    # redirect to the referring page
+    return redirect('annotations:list_interactions', this_interxn.source.name + ',' + this_interxn.target.name)

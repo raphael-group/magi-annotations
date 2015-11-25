@@ -10,64 +10,62 @@
     <th>Target</th>
     <th style='border-right:1px solid #000'>Network</th>
     <th>Reference</th>
- {#    <th>Source</th> #}
+    <th>Votes</th> 
     <th>Annotate</th>
   </tr>
   {% for interxn in interactions %}
+  {% for ref in interxn.interactionreference_set.all %}
   <tr>
-      <td>{{ interxn.source }}</td>
-      <td>{{ interxn.target }}</td>
-      <td style='border-right:1px solid #000'>{{ interxn.input_source }}</td>
-      <td>
-	      {% for ref in interxn.interactionreference_set.all %}
-	      {% ref_link ref.identifier 'PMID' %}
-	      {% if not forloop.last %},{% endif%}
-	      {% empty %}
-	      None
-	      {% endfor %}
-      </td>
-      {# <td>None</td> #}
-      <td>
+	  <td>{{ interxn.source }}</td>
+	  <td>{{ interxn.target }}</td>
+	  <td style='border-right:1px solid #000'>{{ interxn.input_source }}</td>
+	  <td>
+		  {% ref_link ref.identifier 'PMID' %}
+	  </td>
+	  <td> {{ ref.vote_count }} </td> {# todo: count negative/positive #}
+	  <td>
 	      {% if user %}
 	      <ul style='padding-left:12px'>
-		      <li>Upvote</li>
-		      <li>Downvote</li>
+		      <li><a href='#' class='vote upvote' refId='{{ ref.id }}'> Upvote</a></li>
+		      <li><a href='#' class='vote downvote' refId='{{ ref.id }}'> Downvote</a></li>
 	      </ul>
 	      {% endif %}        
-      </td>
-    </tr>
+	  </td>
+  </tr>
+  {% empty %}
+  <tr>
+	  <td>{{ interxn.source }}</td>
+	  <td>{{ interxn.target }}</td>
+	  <td style='border-right:1px solid #000'>{{ interxn.input_source }}</td>
+	  <td> None </td>
+	  <td> 0 </td>
+	  <td> Add a reference for this interaction </td>
+  </tr>
+  
+  {% endfor %}
     {% empty %}
     <tr><td colspan='6' style='text-align:center'>Sorry, no interactions for {{ gene_list|join:"," }}.</td></tr>
     {% endfor %}
 </table>
+<form id='vote' method='POST' action='{% url 'annotations:vote_interactions' %}'>
+	{% csrf_token %}
+	<input type='hidden' name='refId' id='refId'>
+	<input type='hidden' name='is_positive' id='is_positive'>
+</form>
 {% endblock %}
 {% block scripts %}
 <script type='text/javascript'>
-  // Activate tooltips
-  $(function(){ $('span.tooltip-toggle').tooltip() });
-
-  // Perform gene search
-  $('button#geneSearch').click(function(e){
-    e.preventDefault();
-    var geneName = $('input#geneName').val();
-    if (geneName == ''){
-      alert('Please enter a gene name.');
-    } else {
-      window.location = '/annotations/' + geneName;
-    }
-  });
-
-  // Like buttons
-  var fieldNames = ['refPk', 'annotation__cancer__abbr', 'annotation__measurement_type', 'annotation__heritable', 'annotation__characterization'],
-      hiddenForm = $('form#plus_one');
-  $('a.like-btn').click(function(e){
-    e.preventDefault();
-    var link = $(this);
-    fieldNames.forEach(function(n){
-      var val = link.attr(n);
-      if (val != '') hiddenForm.children('#' + n).val(val);
-    });
-    hiddenForm.submit();
+// Vote links
+hiddenForm = $('form#vote');
+  $(document).ready(function () {
+	  $('a.vote').click(function(e){
+		  e.preventDefault();
+		  var link = $(this);
+		  hiddenForm.children('#refId').val(link.attr('refId'));
+		  console.log(link.hasClass('upvote'));
+		  hiddenForm.children('#is_positive').val(link.hasClass('upvote'));
+		  hiddenForm.submit();
+	  });
   });
 </script>
 {% endblock %}

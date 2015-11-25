@@ -172,15 +172,24 @@ class InteractionReference(models.Model):
     def __unicode__(self):
         return unicode(self.identifier)
 
+    def vote_count(self):
+        upvotes = self.interactionvote_set.filter(is_positive=True)
+        downvotes = self.interactionvote_set.filter(is_positive=False)
+        return len(upvotes) - len(downvotes)       
+
     class Meta:
         unique_together = (("identifier", "interaction"))
 
-class InteractionVote:
+class InteractionVote(models.Model):
     user = models.ForeignKey(User, null = True)
     reference = models.ForeignKey(InteractionReference)
+    is_positive = models.BooleanField()
     class Meta:
         unique_together = (("user", "reference"))
-    
+
+    def __unicode__(self):
+        return "Vote: " + self.user.username + " -> " + ("Yes" if self.is_positive else "No") + " on " + unicode(self.reference)
+
 class InteractionForm(ModelForm):
     reference_identifier = forms.CharField(max_length=40)
     class Meta:
