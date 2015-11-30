@@ -211,7 +211,11 @@ def list_interactions(request, gene_names):
 @login_required
 def add_interactions(request):
     if request.method == 'GET':
-        base_form =  InteractionForm(initial = {'input_source': 'Community'})
+        initialInteraction = {'input_source': 'Community'}
+        for field in request.GET:
+            initialInteraction[field] = request.GET[field]
+
+        base_form = InteractionForm(initial = initialInteraction)
         context = dict(path = request.path,
                        user = request.user,
                        interaction_form = base_form)
