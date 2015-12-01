@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.utils.translation import ugettext_lazy as _
 from django import forms
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
+from django_bootstrap_typeahead.fields import *
 
 # CONSTANTS
 mutationTypeChoices  = (('MS', 'Missense'), ('NS', 'Nonsense'), ('FSI', 'Frame-Shift Insertion'), ('IFD', 'In-Frame Deletion'), ('FSD', 'Frame-Shift Deletion'), ('IFI', 'In-Frame Insertion'))
@@ -147,6 +148,21 @@ class Gene(models.Model):
     def __unicode__(self):
         return unicode(self.name)
 
+def validate_gene(val):
+    if Gene.objects.filter(name=val).count() > 0:
+        return True
+    else:
+        raise ValidationError(_('Gene %(value)s not known'),
+                                code='Unknown',
+                                params = {'value': val})
+class GeneField(forms.CharField):
+    default_validators = [validate_gene]
+
+    def clean(self, value):
+        cleaned_data = super(GeneField, self).clean(value)
+        return Gene.objects.get(name=cleaned_data)
+
+        
 # protein-protein interactions
 class Interaction(models.Model):
     source = models.ForeignKey(Gene, related_name='source')
@@ -192,13 +208,15 @@ class InteractionVote(models.Model):
 
 class InteractionForm(ModelForm):
     reference_identifier = forms.CharField(max_length=40)
+    source = GeneField()
+    target = GeneField()
+    
     class Meta:
         model = Interaction
         fields = ['source', 'target', 'input_source']
         widgets = {'input_source': forms.HiddenInput()}
         
-        # todo: sortable, editable field listings
-        # see https://pypi.python.org/pypi/django-bootstrap-typeahead/1.1.5 and install django-bootsrap typeahead
+        # todo: sortable, editable field listings with a typeahead field
         error_messages = {
             NON_FIELD_ERRORS: {
                 'unique_together': '%(model_name)s is not unique.'

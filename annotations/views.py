@@ -244,7 +244,7 @@ def add_interactions(request):
                     attached_ref.save()
 
             return redirect('annotations:list_interactions', interxn.source.name + ',' + interxn.target.name)
-            
+
         return render(request, 'annotations/add_interaction.html',
                       dict(path = request.path,
                            user = request.user,
