@@ -4,7 +4,6 @@ from django.forms import ModelForm, Textarea
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.utils.translation import ugettext_lazy as _
 from django import forms
-from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django_bootstrap_typeahead.fields import *
 
 # CONSTANTS
@@ -64,16 +63,6 @@ class Mutation(models.Model):
     class Meta:
         unique_together = (("gene","locus","original_amino_acid","new_amino_acid","mutation_type","mutation_class"))
 
-class MutationForm(ModelForm):
-    class Meta:
-        model = Mutation
-        fields = ['gene','mutation_class', 'mutation_type', 'original_amino_acid', 'locus', 'new_amino_acid']
-        error_messages = {
-            NON_FIELD_ERRORS: {
-                'unique_together': "%(model_name)s is not unique.",
-                }
-            }
-
 class Reference(models.Model):
     identifier = models.CharField(max_length=30)
     db = models.CharField(max_length=30, choices=dbChoices)
@@ -94,16 +83,6 @@ class Reference(models.Model):
 
     class Meta:
         unique_together = (('identifier', 'db', 'mutation'))
-
-class ReferenceForm(ModelForm):
-    class Meta:
-        model = Reference
-        fields = ['db', 'mutation', 'identifier']
-        error_messages = {
-            NON_FIELD_ERRORS: {
-                'unique_together': "%(model_name)s is not unique.",
-                }
-            }
 
 class Annotation(models.Model):
     heritable        = models.CharField(max_length=8, choices=heritableChoices, blank=True, verbose_name="Heritability")
@@ -134,12 +113,6 @@ class Annotation(models.Model):
             return characterizationChoices[self.characterization]
         return "Unknown"
 
-class AnnotationForm(ModelForm):
-    class Meta:
-        model = Annotation
-        fields = [ 'cancer', 'heritable', 'measurement_type', 'characterization', 'comment']
-        widgets = { 'comment': Textarea(attrs={'cols': 40, 'rows': 3, 'class': 'form-control'})}
-
 # todo: link mutations to genes
 class Gene(models.Model):
     name = models.CharField(max_length=30, primary_key = True)
@@ -148,21 +121,6 @@ class Gene(models.Model):
     def __unicode__(self):
         return unicode(self.name)
 
-def validate_gene(val):
-    if Gene.objects.filter(name=val).count() > 0:
-        return True
-    else:
-        raise ValidationError(_('Gene %(value)s not known'),
-                                code='Unknown',
-                                params = {'value': val})
-class GeneField(forms.CharField):
-    default_validators = [validate_gene]
-
-    def clean(self, value):
-        cleaned_data = super(GeneField, self).clean(value)
-        return Gene.objects.get(name=cleaned_data)
-
-        
 # protein-protein interactions
 class Interaction(models.Model):
     source = models.ForeignKey(Gene, related_name='source')
@@ -205,21 +163,3 @@ class InteractionVote(models.Model):
 
     def __unicode__(self):
         return "Vote: " + self.user.username + " -> " + ("Yes" if self.is_positive else "No") + " on " + unicode(self.reference)
-
-class InteractionForm(ModelForm):
-    reference_identifier = forms.CharField(max_length=40)
-    source = GeneField()
-    target = GeneField()
-    
-    class Meta:
-        model = Interaction
-        fields = ['source', 'target', 'input_source']
-        widgets = {'input_source': forms.HiddenInput()}
-        
-        # todo: sortable, editable field listings with a typeahead field
-        error_messages = {
-            NON_FIELD_ERRORS: {
-                'unique_together': '%(model_name)s is not unique.'
-            }
-        }
-            
