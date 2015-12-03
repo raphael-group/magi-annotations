@@ -47,6 +47,8 @@ class AnnotationForm(ModelForm):
 
 class InteractionForm(ModelForm):
     reference_identifier = forms.CharField(max_length=40)
+    db = forms.CharField(max_length=20,
+                         widget = forms.Select(choices=dbChoices))
     source = GeneField()
     target = GeneField()
     

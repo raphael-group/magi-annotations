@@ -209,7 +209,7 @@ def list_interactions(request, gene_names):
                    gene_list = gene_list,
                    path=request.path,
                    user=request.user)
-
+    
     return render(request, 'annotations/interactions.html', context)
 
 @login_required
@@ -238,12 +238,16 @@ def add_interactions(request):
             # todo: if the gene is not known, then insert it?
             # this is an issue only when editable fields are made
             ref_id = interaction_form.cleaned_data['reference_identifier']
+            db = interaction_form.cleaned_data['db']
             if ref_id:
                 # look for an existing reference first
+                # todo: consider get_or_create for this pattern
                 if not InteractionReference.objects.filter(identifier = ref_id,
-                                                           interaction = interxn):
+                                                           interaction = interxn,
+                                                           db=db):
                     attached_ref = InteractionReference(identifier=ref_id,
                                                     interaction = interxn,
+                                                    db = db,
                                                     user = request.user)                
                     attached_ref.save()
 

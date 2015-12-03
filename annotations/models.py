@@ -125,7 +125,7 @@ class Gene(models.Model):
 class Interaction(models.Model):
     source = models.ForeignKey(Gene, related_name='source')
     target = models.ForeignKey(Gene, related_name='target')
-    input_source = models.CharField(max_length=25)
+    input_source = models.CharField(max_length=25) # answers: which network does this come from?
     def __unicode__(self):
         return unicode(self.source) +  "->" +  unicode(self.target)
 
@@ -139,8 +139,8 @@ class Interaction(models.Model):
                                        input_source = inter_dict['input_source'])
     
 class InteractionReference(models.Model):
-    # all references are PMIDs for the time being
     identifier = models.CharField(max_length=40) 
+    db = models.CharField(max_length=30, choices=dbChoices) # reference source
     interaction = models.ForeignKey(Interaction)
     user = models.ForeignKey(User, null = True)
     def __unicode__(self):

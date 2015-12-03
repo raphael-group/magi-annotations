@@ -20,7 +20,7 @@
 	  <td>{{ interxn.target }}</td>
 	  <td style='border-right:1px solid #000'>{{ interxn.input_source }}</td>
 	  <td>
-		  {% ref_link ref.identifier 'PMID' %}
+		  {% ref_link ref.identifier ref.db %}
 	  </td>
 	  <td> {{ ref.vote_count }} </td> {# todo: count negative/positive #}
 	  <td>
