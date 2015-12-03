@@ -101,7 +101,10 @@ def saveMutation(request):
                 annotationFormSet = RefAnnoFormSet(request.POST, request.FILES,
                                                    instance=validRef)
                 if annotationFormSet.is_valid():
-                    annos = annotationFormSet.save()
+                    anno = annotationFormSet.save(commit=False)[0]
+                    anno.user = request.user
+                    anno.save()
+                    
                     # todo: respond to ajax request instead
                     return redirect('annotations:gene', gene_name=validMutation.gene)
 
