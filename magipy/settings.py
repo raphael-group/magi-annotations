@@ -39,12 +39,12 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_bootstrap_typeahead',
     'debug_toolbar',
     'social.apps.django_app.default',
     'annotations',
     'accounts',
-    'magipy'
+    'magipy',
+    'widget_tweaks'
 )
 
 MIDDLEWARE_CLASSES = (

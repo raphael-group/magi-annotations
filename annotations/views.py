@@ -237,7 +237,7 @@ def add_interactions(request):
         if interxn:
             # todo: if the gene is not known, then insert it?
             # this is an issue only when editable fields are made
-            ref_id = interaction_form.cleaned_data['reference_identifier']
+            ref_id = interaction_form.cleaned_data['reference_identifier'] # create
             db = interaction_form.cleaned_data['db']
             if ref_id:
                 # look for an existing reference first
@@ -286,3 +286,8 @@ def remove_interaction_vote(request, vote_id):
         this_vote.delete()
     # todo: send json redirect or return to the referring page
     return redirect('profile')
+
+def list_genes_as_json(request):
+    gene_list = map(lambda s: unicode(s), Gene.objects.values_list('name', flat=True))
+    gene_list.sort()
+    return JsonResponse({'genes': gene_list})

@@ -16,5 +16,7 @@ urlpatterns = [
     url(r'^interactions/add/$', views.add_interactions, name='add_interactions'),
     url(r'^interactions/vote/$', views.vote_interaction_ref, name='vote_interactions'),
     url(r'^interactions/vote/(?P<vote_id>[0-9]+)/delete$', views.remove_interaction_vote, name='remove_interaction_vote'), # todo: use REST semantics and DELETE method, with middleware
-    url(r'^interactions/(?P<gene_names>[A-Za-z0-9,]+)/$', views.list_interactions, name='list_interactions')
+    url(r'^interactions/(?P<gene_names>[A-Za-z0-9,]+)/$', views.list_interactions, name='list_interactions'),
+
+    url(r'^metadata/genes/all/$', views.list_genes_as_json, name='list_genes')
 ]

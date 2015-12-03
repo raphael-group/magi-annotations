@@ -9,9 +9,26 @@ def validate_gene(val):
         raise ValidationError(_('Gene %(value)s not known'),
                                 code='Unknown',
                                 params = {'value': val})
-class GeneField(forms.CharField):
-    default_validators = [validate_gene]
 
+class GeneWidget(forms.TextInput):
+#    def __init__(self, attrs = None): # todo: make these typeahead by default
+#        if attrs is None:
+#            attrs = {'class': 'typeahead'}
+#        elif 'class' not in attrs:
+#            attrs['class'] = 'typeahead'
+#        else:
+#            attrs['class'] += ' typeahead'
+#
+#        super(GeneWidget, self).__init__(attrs)        
+    class Media:
+        js = ('components/d3/d3.min.js',
+              'components/typeahead.js/dist/typeahead.bundle.min.js',
+              'components/handlebars/handlebars.min.js',
+              'components/gene-typeahead.js',)
+        
+class GeneField(forms.CharField):
+    description = "typeahead field for selecting genes"
+    default_validators = [validate_gene]
     def clean(self, value):
         cleaned_data = super(GeneField, self).clean(value)
         return Gene.objects.get(name=cleaned_data)
@@ -49,8 +66,8 @@ class InteractionForm(ModelForm):
     reference_identifier = forms.CharField(max_length=40)
     db = forms.CharField(max_length=20,
                          widget = forms.Select(choices=dbChoices))
-    source = GeneField()
-    target = GeneField()
+    source = GeneField(widget = GeneWidget())
+    target = GeneField(widget = GeneWidget())
     
     class Meta:
         model = Interaction

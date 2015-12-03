@@ -5,6 +5,8 @@
     "jquery": "latest",
     "d3": "latest",
     "bootstrap": "3.x",
-    "DataTables": "latest"
+    "DataTables": "latest",
+    "typeahead.js": "latest",
+    "handlebars": "latest"
   }
 }
