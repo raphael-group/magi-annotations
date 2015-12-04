@@ -13,7 +13,7 @@ Create a new referenced mutation and annotate it
 {% if mutation_form|has_errors or reference_form|has_errors or anno_form|has_errors %}
 <div class="alert alert-danger">
 	Errors occured while adding your referenced mutation.
-	{% if mutation_form|has_errors %} {{ mutation_form.errors }} {% endif  %}
+	{% if mutation_form|has_errors %} {{ mutation_form.errors }} {% endif %}
 	{% if reference_form|has_errors %} {{ reference_form.errors }} {% endif %}
 	{% if anno_form|has_errors %} {{ anno_form.errors }} {% endif %}
 
@@ -36,12 +36,12 @@ Create a new referenced mutation and annotate it
 			</div>
 			<div class="form-group">
 				<label for={{ mutation_form.mutation_class.id_for_label }}>Mutation class</label>
-				{{ mutation_form.mutation_class|addclass:'form-control' }}
+				{{ mutation_form.mutation_class|add_class:'form-control' }}
 			</div>
 
 			<div class="form-group">
 				<label for={{ mutation_form.mutation_type.id_for_label }}>Mutation type</label>
-				{{ mutation_form.mutation_type|addclass:'form-control' }}
+				{{ mutation_form.mutation_type|add_class:'form-control' }}
 			</div>
 
 			<div class="form-group">
@@ -53,8 +53,8 @@ Create a new referenced mutation and annotate it
 
 			<div class="form-group">
 				<label for={{ reference_form.0.identifier.id_for_label }}>Reference Identifier</label>
-				{{ reference_form.0.db|addclass:'form-control' }}
-				{{ reference_form.0.identifier|addclass:'form-control' }}
+				{{ reference_form.0.db|add_class:'form-control' }}
+				{{ reference_form.0.identifier|add_class:'form-control' }}
 			</div>
 		</div>
 	</div>
@@ -68,7 +68,7 @@ Create a new referenced mutation and annotate it
 			{% for anno_form_field in anno_form.0.visible_fields %}
 			<div class="form-group">
 				{{ anno_form_field.label_tag }}
-				{{ anno_form_field|addclass:'form-control' }}
+				{{ anno_form_field|add_class:'form-control' }}
 				</div>
 			{% endfor %}
 		</div>
