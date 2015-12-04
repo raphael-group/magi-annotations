@@ -10,24 +10,38 @@ def validate_gene(val):
                                 code='Unknown',
                                 params = {'value': val})
 
-class GeneWidget(forms.TextInput):
+### set up gene fields to be typehaead autocomplete fields
+class GeneWidget(forms.TextInput):    
+    def __init__(self, *args, **kwargs):
+        if 'attrs' not in kwargs:
+            kwargs['attrs'] = {'class': 'gene-typeahead'}
+        elif 'class' not in kwargs['attrs']:
+            kwargs['attrs']['class'] = 'gene-typeahead'
+        else:
+            kwargs['attrs']['class'] += ' gene-typeahead'
+              
+        super(forms.TextInput, self).__init__(*args, **kwargs)
+        
+### note: in the template, the form's media must be included in scripts block
     class Media:
         js = ('components/d3/d3.min.js',
               'components/typeahead.js/dist/typeahead.bundle.min.js',
               'components/handlebars/handlebars.min.js',
               'components/gene-typeahead.js',)
-        
+
 class GeneField(forms.CharField):
     description = "typeahead field for selecting genes"
+
+    ### note: by validating this way, we only accept annotations for genes we know about
     default_validators = [validate_gene]
+    widget = GeneWidget
+    
     def clean(self, value):
         cleaned_data = super(GeneField, self).clean(value)
         return Gene.objects.get(name=cleaned_data)
-
     
-# todo: use genefield here as well
 class MutationForm(ModelForm):
-    gene = GeneField(widget = GeneWidget())
+    gene = GeneField()  
     class Meta:
         model = Mutation
         fields = ['gene','mutation_class', 'mutation_type', 'original_amino_acid', 'locus', 'new_amino_acid']
@@ -58,8 +72,8 @@ class InteractionForm(ModelForm):
     reference_identifier = forms.CharField(max_length=40)
     db = forms.CharField(max_length=20,
                          widget = forms.Select(choices=dbChoices))
-    source = GeneField(widget = GeneWidget())
-    target = GeneField(widget = GeneWidget())
+    source = GeneField()
+    target = GeneField()
     
     class Meta:
         model = Interaction
