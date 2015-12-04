@@ -11,15 +11,6 @@ def validate_gene(val):
                                 params = {'value': val})
 
 class GeneWidget(forms.TextInput):
-#    def __init__(self, attrs = None): # todo: make these typeahead by default
-#        if attrs is None:
-#            attrs = {'class': 'typeahead'}
-#        elif 'class' not in attrs:
-#            attrs['class'] = 'typeahead'
-#        else:
-#            attrs['class'] += ' typeahead'
-#
-#        super(GeneWidget, self).__init__(attrs)        
     class Media:
         js = ('components/d3/d3.min.js',
               'components/typeahead.js/dist/typeahead.bundle.min.js',
@@ -36,6 +27,7 @@ class GeneField(forms.CharField):
     
 # todo: use genefield here as well
 class MutationForm(ModelForm):
+    gene = GeneField(widget = GeneWidget())
     class Meta:
         model = Mutation
         fields = ['gene','mutation_class', 'mutation_type', 'original_amino_acid', 'locus', 'new_amino_acid']

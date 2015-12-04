@@ -28,8 +28,17 @@ class Cancer(models.Model):
 
     def __unicode__(self): return '{} ({})'.format(self.name, self.abbr)
 
+
+
+class Gene(models.Model):
+    name = models.CharField(max_length=30, primary_key = True)
+    chromosome = models.SmallIntegerField(null = True)
+    locus = models.IntegerField(null = True)
+    def __unicode__(self):
+        return unicode(self.name)
+
 class Mutation(models.Model):
-    gene                = models.CharField(max_length=30)
+    gene                = models.ForeignKey(Gene)
     locus               = models.IntegerField('locus')
     original_amino_acid = models.CharField(max_length=30) # describes SNV
     new_amino_acid      = models.CharField(max_length=30)
@@ -112,14 +121,6 @@ class Annotation(models.Model):
         if self.characterization in characterizationChoices:
             return characterizationChoices[self.characterization]
         return "Unknown"
-
-# todo: link mutations to genes
-class Gene(models.Model):
-    name = models.CharField(max_length=30, primary_key = True)
-    chromosome = models.SmallIntegerField(null = True)
-    locus = models.IntegerField(null = True)
-    def __unicode__(self):
-        return unicode(self.name)
 
 # protein-protein interactions
 class Interaction(models.Model):

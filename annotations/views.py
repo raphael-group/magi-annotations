@@ -24,7 +24,7 @@ def gene(request, gene_name):
     annotation_fields = ['annotation__heritable', 'annotation__measurement_type',
                          'annotation__characterization', 'annotation__cancer__abbr']
     counters = [ Count(f) for f in annotation_fields ]
-    refs = Reference.objects.filter(mutation__gene__iexact=gene_name).values(*fields).annotate(*counters)
+    refs = Reference.objects.filter(mutation__gene=gene_name).values(*fields).annotate(*counters)
 
     # For each value we want to count, merge the counts across references
     pkToAnnotation = dict()
