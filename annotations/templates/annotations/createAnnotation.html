@@ -3,19 +3,18 @@
 Create a new referenced mutation and annotate it
 {% endblock %}
 {% block content %}
-{% load annotation_filters %}
 {% load widget_tweaks %}
 {% load annotation_tags %}
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 <!-- Add/Edit annotation panel  -->
 {% if user.is_authenticated %}
 {% url 'annotations:saveMutation' as post_url %}
-{% if mutation_form|has_errors or reference_form|has_errors or anno_form|has_errors %}
+{% if mutation_form.errors or reference_form.0.errors or anno_form.0.has_errors %}
 <div class="alert alert-danger">
 	Errors occured while adding your referenced mutation.
-	{% if mutation_form|has_errors %} {{ mutation_form.errors }} {% endif %}
-	{% if reference_form|has_errors %} {{ reference_form.errors }} {% endif %}
-	{% if anno_form|has_errors %} {{ anno_form.errors }} {% endif %}
+	{% if mutation_form.errors %} {{ mutation_form.errors }} {% endif %}
+	{% if reference_form.0.errors %} {{ reference_form.0.errors }} {% endif %}
+	{% if anno_form.0.errors %} {{ anno_form.0.errors }} {% endif %}
 
 </div>
 {% endif %}

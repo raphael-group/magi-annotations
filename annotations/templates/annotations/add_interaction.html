@@ -1,12 +1,11 @@
 {% extends "layout.html" %}
 {% load annotation_tags %}
-{% load annotation_filters %}
 {% load widget_tweaks %}
 {% block title %}MAGI: Add protein-protein interaction {% endblock %}
 {% block content %}
 <h3> Add protein-protein interactions </h3>
 
-{% if interaction_form|has_errors %}
+{% if interaction_form.errors %}
 <div class = 'alert alert-danger'>
 	Errors occurred while adding your referenced interaction.
 	{{ interaction_form.errors }}
