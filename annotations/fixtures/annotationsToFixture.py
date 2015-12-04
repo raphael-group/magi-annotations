@@ -1,7 +1,28 @@
 #!/usr/env python
 
+# what to run?
+
 # Load required modules
-import sys, os, argparse, json, re, datetime
+import sys, os, argparse, json, re, datetime, glob
+###############
+def readExisting(fileGlob, keyfields):
+    existing = set()
+    fixture_files = []
+    for pattern in fileGlob:
+        fixture_files.extend(glob.glob(pattern))
+
+    for fil in fixture_files:
+        print 'Reading file ' + fil + '...'
+        with open(fil) as f:
+            content = json.load(f)
+            for item in content:
+                field_dict = item['fields']
+                key_item = tuple(field_dict[field] for field in keyfields)
+                existing.add(key_item)
+
+    return existing
+
+###############
 now = datetime.date.today().strftime("%Y-%m-%d")
 
 # CONSTANTS
@@ -22,10 +43,17 @@ with open(args.cancer_fixture_file) as f:
     cancers = json.load(f)
     cancerToPk = dict( (c['fields']['abbr'], c['pk']) for c in cancers )
 
+# Read any previous sample files
+
 # Load the annotations file to create a list of mutations
 mutations, mutationPk, mutationToPk = [], 1, dict()
 parsedRows = [ ]
+
+# note: this depends on the locations given in networksToFixture.py
 seen = set()
+seenGenes = readExisting(['annotations/fixtures/*-genes.json'], ['name'])
+
+newGenes = []
 for annotation_file, source, heritable in zip(args.annotation_files, args.sources, args.heritable):
     with open(annotation_file) as f:
         arrs = [ l.rstrip('\n').split('\t') for l in f if not l.startswith('#') ]
@@ -43,6 +71,12 @@ for annotation_file, source, heritable in zip(args.annotation_files, args.source
             except (ValueError, AttributeError):
                 print 'Skipping [{}:{}]...'.format(gene, change)
                 continue
+
+            # if the gene is not seen:
+            if gene not in seenGenes:
+                newGenes.append(dict(model='annotations.gene',
+                                      fields = dict(name=gene)))
+                seenGenes.add(gene)
 
             # Record a unique mutation key per row
             mutationKey = (gene, parsedLocus, oaa, naa, mutClass, mutType)
@@ -63,6 +97,7 @@ for annotation_file, source, heritable in zip(args.annotation_files, args.source
 
             # Append the parsed, de-duplicated rows
             parsedRows.append( (gene, cancer, mutClass, mutType, parsedLocus, oaa, naa, pmid, source, heritable ) )
+
 
 # Create a list of references
 refs, refPk, referenceToMutationToPk = [], 1, dict()
@@ -108,3 +143,5 @@ with open(args.output_prefix + '-mutations.json', 'w') as out:
     json.dump( mutations, out, sort_keys=True, indent=4 )
 with open(args.output_prefix + '-references.json', 'w') as out:
     json.dump( refs, out, sort_keys=True, indent=4 )
+with open(args.output_prefix + '-new-genes.json', 'w') as out:
+    json.dump( newGenes, out, sort_keys=True, indent=4 )
