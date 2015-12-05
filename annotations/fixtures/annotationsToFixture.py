@@ -51,9 +51,7 @@ parsedRows = [ ]
 
 # note: this depends on the locations given in networksToFixture.py
 seen = set()
-seenGenes = readExisting(['annotations/fixtures/*-genes.json'], ['name'])
 
-newGenes = []
 for annotation_file, source, heritable in zip(args.annotation_files, args.sources, args.heritable):
     with open(annotation_file) as f:
         arrs = [ l.rstrip('\n').split('\t') for l in f if not l.startswith('#') ]
@@ -71,12 +69,6 @@ for annotation_file, source, heritable in zip(args.annotation_files, args.source
             except (ValueError, AttributeError):
                 print 'Skipping [{}:{}]...'.format(gene, change)
                 continue
-
-            # if the gene is not seen:
-            if gene not in seenGenes:
-                newGenes.append(dict(model='annotations.gene',
-                                      fields = dict(name=gene)))
-                seenGenes.add(gene)
 
             # Record a unique mutation key per row
             mutationKey = (gene, parsedLocus, oaa, naa, mutClass, mutType)
@@ -143,5 +135,3 @@ with open(args.output_prefix + '-mutations.json', 'w') as out:
     json.dump( mutations, out, sort_keys=True, indent=4 )
 with open(args.output_prefix + '-references.json', 'w') as out:
     json.dump( refs, out, sort_keys=True, indent=4 )
-with open(args.output_prefix + '-new-genes.json', 'w') as out:
-    json.dump( newGenes, out, sort_keys=True, indent=4 )

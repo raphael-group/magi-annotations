@@ -28,12 +28,11 @@ class Cancer(models.Model):
 
     def __unicode__(self): return '{} ({})'.format(self.name, self.abbr)
 
-
-
 class Gene(models.Model):
     name = models.CharField(max_length=30, primary_key = True)
-    chromosome = models.SmallIntegerField(null = True)
-    locus = models.IntegerField(null = True)
+    chromosome = models.CharField(max_length=2, null = True)
+    locus_begin = models.IntegerField(null = True)
+    locus_end = models.IntegerField(null = True)
     def __unicode__(self):
         return unicode(self.name)
 
@@ -138,9 +137,9 @@ class Interaction(models.Model):
         return Interaction.objects.get(source = inter_dict['source'],
                                        target = inter_dict['target'],
                                        input_source = inter_dict['input_source'])
-    
+
 class InteractionReference(models.Model):
-    identifier = models.CharField(max_length=40) 
+    identifier = models.CharField(max_length=40)
     db = models.CharField(max_length=30, choices=dbChoices) # reference source
     interaction = models.ForeignKey(Interaction)
     user = models.ForeignKey(User, null = True)
@@ -150,7 +149,7 @@ class InteractionReference(models.Model):
     def vote_count(self):
         upvotes = self.interactionvote_set.filter(is_positive=True)
         downvotes = self.interactionvote_set.filter(is_positive=False)
-        return len(upvotes) - len(downvotes)       
+        return len(upvotes) - len(downvotes)
 
     class Meta:
         unique_together = (("identifier", "interaction"))

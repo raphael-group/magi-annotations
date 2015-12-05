@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from .models import *
 from .forms import *
 from django.db.models import Count, Q
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.contrib.auth.decorators import login_required
 from collections import defaultdict
 from django.forms import inlineformset_factory
@@ -49,6 +49,7 @@ def gene(request, gene_name):
     return render(request, 'annotations/gene.html', context)
 
 @login_required
+# todo: these should be atomic transactions
 def saveMutation(request):
     MutRefFormSet = inlineformset_factory(Mutation, Reference, form=ReferenceForm,
                                           extra=1,can_delete=False)
@@ -213,6 +214,7 @@ def list_interactions(request, gene_names):
     return render(request, 'annotations/interactions.html', context)
 
 @login_required
+# todo: these should be atomic transactions
 def add_interactions(request):
     if request.method == 'GET':
         initialInteraction = {'input_source': 'Community'}
