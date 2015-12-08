@@ -35,6 +35,15 @@ Then I loaded the data in django.
 
 > python manage.py annotations/fixtures/all-networks*
 
-#### 2015/12/3 ####
+#### 2015/12/8 ####
 
-The annotation file fixture files now rely on the ppi networks fixtures (for gene listings), so network fixtures should be generated before annotation fixtures.
+We now provide a conversion script to create a genome fixture, which must be loaded into the database before annotations or networks.
+
+The script can be run as
+
+> python genomeToFixture.py -gf ../../../magi/data/genome/hg19_genes_list.tsv -o hg19
+
+The fixtures should then be loaded in specific order, genome and cancers first:
+
+> python manage.py loaddata annotations/fixtures/hg19-genome.json annotations/fixtures/icgc-tcga-cancers.json
+> python manage.py loaddata annotations/fixtures/*.json
