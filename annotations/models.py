@@ -4,7 +4,6 @@ from django.forms import ModelForm, Textarea
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.utils.translation import ugettext_lazy as _
 from django import forms
-from django_bootstrap_typeahead.fields import *
 
 # CONSTANTS
 mutationTypeChoices  = (('MS', 'Missense'), ('NS', 'Nonsense'), ('FSI', 'Frame-Shift Insertion'), ('IFD', 'In-Frame Deletion'), ('FSD', 'Frame-Shift Deletion'), ('IFI', 'In-Frame Insertion'))
