@@ -26,7 +26,8 @@ for network_file in args.network_files:
                 for pmid in set(PMIDlist.split(',')):
                     ref = dict(model='annotations.interactionreference', pk=refCounter, fields = dict(
                         identifier = pmid,
-                        interaction = idx
+                        interaction = idx,
+                        db = 'PMID' # database is always PMID for these 
                     ))
                     refCounter += 1
                     references.append(ref)
