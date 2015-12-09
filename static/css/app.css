@@ -39,6 +39,15 @@ ul.nav li a:hover {
   padding: 5px 15px;
 }
 
+/* tabular data */
+td.thin-border-right, th.thin-border-right {
+    border-right:1px solid #000
+}
+
+thead tr {
+background: #d3d3d3
+}
+
 /* Footer */
 ul#more-info, ul#even-more-info{list-style-type: none;padding-left:0px;}
 ul#more-info li, ul#even-more-info li{display:inline;padding-left:5px;padding-right:5px;}

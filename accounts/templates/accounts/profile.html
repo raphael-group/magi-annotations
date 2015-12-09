@@ -7,23 +7,25 @@
   <thead><tr><th>Attribute</th><th>Value</th></tr></thead>
   <tr><td>Email</td><td>{{ user.email }}</td></tr>
 </table>
-<div id="user-source-annotations">
+<div id="user-mutation-references">
   <h4> Your Mutation References </h4>
   {% for ref in user.reference_set.all %}
   {% if forloop.first %}
   <table class='table table-striped'>
-    <thead><tr style='background:#d3d3d3'>
+    <thead><tr>
+	<th>Gene</th>
 	<th>Class</th>
 	<th>Type</th>
-	<th style='border-right:1px solid #000'>Protein Sequence Change</th>
+	<th class='thin-border-right'>Protein Sequence Change</th>
 	<th>Reference</th>
 	<th>Actions</th>
     </tr></thead>
     <tbody>
   {% endif %}
       <tr><td>{{ ref.mutation.gene }}</td>
-	<td>{{ ref.mutation.locus }}</td>
-	<td style='border-right:1px solid #000'>{{ ref.mutation.full_change }}</td>
+	<td>{{ ref.mutation.mutation_class }}</td>
+	<td>{{ ref.mutation.mutation_type }}</td>
+	<td class='thin-border-right'>{{ ref.mutation.full_change }}</td>
 	<td>{% ref_link ref.identifier ref.db %}</td>
 	<td>
 	  {% if ref.annotation_set.count > 0 %}
@@ -43,13 +45,16 @@
 
 <div id="user-source-annotations">
   <h4> Your Mutation Reference Annotations </h4>
+  {% for sourceAnno in user.annotation_set.all %}
+  {% if forloop.first %}
   <table class='table table-striped'>
-    <thead><tr style='background:#d3d3d3'>
+    <thead><tr>
+	<th>Gene</th>
 	<th>Class</th>
 	<th>Type</th>
-	<th style='border-right:1px solid #000'>Protein Sequence Change</th>
+	<th class='thin-border-right'>Protein Sequence Change</th>
 	<th>Reference</th>
-	<th>Source</th>
+<!--	<th>Source</th> -->
 	<th>Cancer</th>
 	<th>Somatic?</th>
 	<th>Measurement Type</th>
@@ -57,49 +62,57 @@
 	<th>Actions</th>
     </tr></thead>
     <tbody>
-      {% for sourceAnno in user.annotation_set.all %}
+  {% endif %}
       <tr><td>{{ sourceAnno.reference.mutation.gene }}</td>
-	<td>{{ sourceAnno.reference.mutation.locus }}</td>
-	<td style='border-right:1px solid #000'>{{ sourceAnno.reference.mutation.full_change }}</td>
+	<td>{{ sourceAnno.reference.mutation.mutation_class }}</td>
+	<td>{{ sourceAnno.reference.mutation.mutation_type }}</td>
+	<td class='thin-border-right'>{{ sourceAnno.reference.mutation.full_change }}</td>
 	<td>{% ref_link sourceAnno.reference.identifier sourceAnno.reference.db %}</td>
-	<td>{{ sourceAnno.source }}</td>
-	<td>{{ sourceAnno.cancer }}</td>
-	<td>{{ sourceAnno.heritable_mapped }}</td>
-	<td>{{ sourceAnno.measurement_mapped }}</td>
-	<td>{{ sourceAnno.characterization_mapped }}</td>
+<!--	<td>{{ sourceAnno.source }}</td> -->
+	<td>{{ sourceAnno.cancer|default:'Unknown' }}</td>
+	<td>{{ sourceAnno.get_heritable_display|default:'Unknown' }}</td>
+	<td>{{ sourceAnno.get_measurement_type_display|default:'Unknown' }}</td>
+	<td>{{ sourceAnno.get_characterization_display|default:'Unknown' }}</td>
 	<td><ul>
 	    <li><a href='{% url 'annotations:details' ref_pk=sourceAnno.reference.pk %}'>Edit</a></li>
 	    <li><a href='{% url 'annotations:remove_annotation' gene_name=sourceAnno.reference.mutation.gene ref_pk=sourceAnno.reference.pk %}'>Remove</a></li>
       </ul></td></tr>
-      {% empty %}
-      <p> You have not annotated any reference mutations. </p>
-      {% endfor %}
+  {% if forloop.last %}
     </tbody>
   </table>
+  {% endif %}
+  {% empty %}
+  <p> You have not annotated any reference mutations. </p>
+  {% endfor %}
 </div>
 
 <div id="user-interactions-votes">
   <h4> Your Interaction Votes </h4>
+  {% for vote in user.interactionvote_set.all %} 
+  {% if forloop.first %}
   <table class='table table-striped'>
-    <thead><tr style='background:#d3d3d3'>
+    <thead><tr>
 	<th>Source</th>
-	<th style='border-right:1px solid #000'>Target</th>
+	<th class='thin-border-right'>Target</th>
 	<th>Reference</th>
 	<th>Vote</th>
 	<th>Delete?</th>
     </tr></thead>
     <tbody>
-      {% for vote in user.interactionvote_set.all %} <tr>
+  {% endif %}
+      <tr>
 	<td>{{ vote.reference.interaction.source }}</td>
-	<td style='border-right:1px solid #000'>{{ vote.reference.interaction.target }}</td>
+	<td class='thin-border-right'>{{ vote.reference.interaction.target }}</td>
 	<td>{% ref_link vote.reference.identifier 'PMID' %}</td>
 	<td>{{ vote.is_positive|yesno }}</td>
 	<td> <a href="{% url 'annotations:remove_interaction_vote' vote.id %}"'>Delete</td>
       </tr>
-      {% empty %}
-      <p> You have not annotated any reference mutations. </p>
-      {% endfor %}
+  {% if forloop.last %}
     </tbody>
   </table>
+  {% endif %}
+  {% empty %}
+  <p> You have not annotated any reference mutations. </p>
+  {% endfor %}
 </div>
 {% endblock %}
