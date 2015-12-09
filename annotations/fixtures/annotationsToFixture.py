@@ -121,9 +121,10 @@ for i, (gene, cancer, mutClass, mutType, locus, oaa, naa, pmid, source, heritabl
     fields = dict(created_on=now, last_edited=now)
     if heritable is not None and heritable != '':
         fields['heritable'] = heritableToAbbr[heritable]
-    if cancer != '':
+    if cancer:
         if cancer == 'aml': cancer = 'laml'
-        fields['cancer'] = cancerToPk[cancer]
+        fields['cancer'] = cancer
+
     fields['reference'] = referenceToMutationToPk[pmid][mutationKey]
     annotation = dict(model='annotations.annotation', pk=i+1, fields=fields)
     annotations.append(annotation)
