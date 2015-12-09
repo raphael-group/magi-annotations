@@ -10,46 +10,37 @@ from django.forms import inlineformset_factory
 from django.core.exceptions import ObjectDoesNotExist
 
 # Create your views here.
-def index(request):
-    return HttpResponse("Hello, world. You're at the annotations index.")
 
-def gene(request, gene_name):
-    # List of fields we want to display for our references
-    fields = ['mutation__mutation_class', 'mutation__mutation_type',
-              'mutation__locus', 'mutation__original_amino_acid',
-              'mutation__new_amino_acid', 'pk', 'identifier', 'db', 'source',
-              'annotation__heritable', 'annotation__measurement_type',
-              'annotation__characterization', 'annotation__cancer__abbr', 'annotation__user_id']
+## CREATE operations ##
+@login_required
+def save(request, annotation_pk=None): # create a single mutation reference annotation
+    # Try to get the annotation and update it
+    if annotation_pk is not None:
+        instance = Annotation.objects.get(pk=annotation_pk)
+        ref      = instance.reference
+        form     = AnnotationForm(instance=instance, data=request.POST)
+        # Make sure that the
+        if request.user.pk != instance.user.pk:
+            return redirect('annotations:details', ref_pk=ref.pk)
 
-    # Values we want to count
-    annotation_fields = ['annotation__heritable', 'annotation__measurement_type',
-                         'annotation__characterization', 'annotation__cancer__abbr']
-    counters = [ Count(f) for f in annotation_fields ]
-    refs = Reference.objects.filter(mutation__gene=gene_name).values(*fields).annotate(*counters)
+    # Otherwise we're making a new annotation
+    else:
+        ref  = Reference.objects.get(pk=request.POST.get('reference_id'))
+        form = AnnotationForm(data=request.POST)
 
-    # For each value we want to count, merge the counts across references
-    pkToAnnotation = dict()
-    for ref in refs:
-        if ref['pk'] not in pkToAnnotation:
-            ref['user_annotated'] = False
-            ref['counter'] = dict( (f, defaultdict(int)) for f in annotation_fields)
-            ref['no_annotations'] = True
-            pkToAnnotation[ref['pk']] = ref
-        if request.user.is_authenticated() and request.user.pk == ref['annotation__user_id']:
-            pkToAnnotation[ref['pk']]['user_annotated'] = True
-        for f in annotation_fields:
-            if ref[f] == '' or ref[f] is None: continue
-            pkToAnnotation[ref['pk']]['counter'][f][ref[f]] += ref[f + '__count']
-            pkToAnnotation[ref['pk']]['no_annotations'] = False
+    # Try saving the form
+    if form.is_valid():
+        a = form.save(commit=False)
+        a.reference = ref
+        a.user = request.user
+        a.save()
+    else:
+        print form.errors
 
-    # Sort the annotations
-    references = sorted(pkToAnnotation.values(), key=lambda r: (not r['user_annotated'], r['no_annotations'], r['mutation__locus']))
-
-    # Render the view
-    context = dict(references=references, gene=gene_name, mapper=modelChoiceMappers, path=request.path)
-    return render(request, 'annotations/gene.html', context)
+    return redirect('annotations:details', ref_pk=ref.pk)
 
 @login_required
+# create a mutation and reference and (optionally) an annotation
 # todo: these should be atomic transactions
 def saveMutation(request):
     MutRefFormSet = inlineformset_factory(Mutation, Reference, form=ReferenceForm,
@@ -120,52 +111,8 @@ def saveMutation(request):
                                    anno_form = annotationFormSet)
         return render(request, 'annotations/createAnnotation.html', originalFormContext)
 
-def details(request, ref_pk):
-    # Retrieve the annotations for this reference
-    ref = Reference.objects.get(pk=ref_pk)
-    annotations = Annotation.objects.filter(reference=ref)
-
-    # Initialize the context
-    context = dict(mutation=ref.mutation, ref=ref, user=request.user, annotations=annotations, path=request.path)
-
-    # Retrieve the annotation for the current user (if necessary)
-    if request.user.is_authenticated():
-        try:
-            user_annotation = Annotation.objects.get(user=request.user, reference=ref)
-            context['annotation_form'] = AnnotationForm(instance=user_annotation)
-            context['user_annotation'] = user_annotation
-        except Annotation.DoesNotExist:
-            context['annotation_form'] = AnnotationForm()
-    return render(request, 'annotations/details.html', context)
-
 @login_required
-def save(request, annotation_pk=None):
-    # Try to get the annotation and update it
-    if annotation_pk is not None:
-        instance = Annotation.objects.get(pk=annotation_pk)
-        ref      = instance.reference
-        form     = AnnotationForm(instance=instance, data=request.POST)
-        # Make sure that the
-        if request.user.pk != instance.user.pk:
-            return redirect('annotations:details', ref_pk=ref.pk)
-
-    # Otherwise we're making a new annotation
-    else:
-        ref  = Reference.objects.get(pk=request.POST.get('reference_id'))
-        form = AnnotationForm(data=request.POST)
-
-    # Try saving the form
-    if form.is_valid():
-        a = form.save(commit=False)
-        a.reference = ref
-        a.user = request.user
-        a.save()
-    else:
-        print form.errors
-
-    return redirect('annotations:details', ref_pk=ref.pk)
-
-@login_required
+# create an annotation that agrees with the majority
 def plus_one(request, gene_name):
     # Extract the reference we're annotating
     refPk = int(request.POST.get('refPk'))
@@ -194,35 +141,8 @@ def plus_one(request, gene_name):
     # Redirect to the gene page in question
     return redirect('annotations:gene', gene_name=gene_name)
 
-
-def list_interactions(request, gene_names):
-    # if there is only one, list all, else list only those included
-    gene_list = gene_names.split(',')
-    if len(gene_list) > 1:
-        interxns = Interaction.objects.filter(source__in=gene_list, target__in=gene_list)
-    elif len(gene_list) == 1:
-        gene = gene_names
-        interxns = Interaction.objects.filter(Q(source=gene) | Q(target=gene) )
-
-    # identify which items have a user's vote
-    user_votes = {}
-    if request.user:
-        refs_with_vote = InteractionReference.objects.filter(
-            interaction__in = interxns,
-            interactionvote__user = request.user)
-        for ref in refs_with_vote:
-            user_votes[ref.pk] = ref.interactionvote_set.get(user = request.user).is_positive
-
-#    print user_votes
-    context = dict(interactions = interxns,
-                   gene_list = gene_list,
-                   user_votes = user_votes,
-                   path=request.path,
-                   user=request.user)
-    
-    return render(request, 'annotations/interactions.html', context)
-
 @login_required
+# create an interaction and reference
 # todo: these should be atomic transactions
 def add_interactions(request):
     if request.method == 'GET':
@@ -268,6 +188,7 @@ def add_interactions(request):
                            interaction_form = interaction_form))
 
 @login_required
+# vote on an interaction, or modify an existing interaction vote
 def vote_interaction_ref(request):
     if request.method == 'POST':
         this_ref = InteractionReference.objects.get(id=request.POST.get('refId'));
@@ -300,6 +221,98 @@ def vote_interaction_ref(request):
 
     # should never GET
 
+
+## RETRIEVE operations
+def index(request):
+    return HttpResponse("Hello, world. You're at the annotations index.")
+
+def gene(request, gene_name):
+    # List of fields we want to display for our references
+    fields = ['mutation__mutation_class', 'mutation__mutation_type',
+              'mutation__locus', 'mutation__original_amino_acid',
+              'mutation__new_amino_acid', 'pk', 'identifier', 'db', 'source',
+              'annotation__heritable', 'annotation__measurement_type',
+              'annotation__characterization', 'annotation__cancer__abbr', 'annotation__user_id']
+
+    # Values we want to count
+    annotation_fields = ['annotation__heritable', 'annotation__measurement_type',
+                         'annotation__characterization', 'annotation__cancer__abbr']
+    counters = [ Count(f) for f in annotation_fields ]
+    refs = Reference.objects.filter(mutation__gene=gene_name).values(*fields).annotate(*counters)
+
+    # For each value we want to count, merge the counts across references
+    pkToAnnotation = dict()
+    for ref in refs:
+        if ref['pk'] not in pkToAnnotation:
+            ref['user_annotated'] = False
+            ref['counter'] = dict( (f, defaultdict(int)) for f in annotation_fields)
+            ref['no_annotations'] = True
+            pkToAnnotation[ref['pk']] = ref
+        if request.user.is_authenticated() and request.user.pk == ref['annotation__user_id']:
+            pkToAnnotation[ref['pk']]['user_annotated'] = True
+        for f in annotation_fields:
+            if ref[f] == '' or ref[f] is None: continue
+            pkToAnnotation[ref['pk']]['counter'][f][ref[f]] += ref[f + '__count']
+            pkToAnnotation[ref['pk']]['no_annotations'] = False
+
+    # Sort the annotations
+    references = sorted(pkToAnnotation.values(), key=lambda r: (not r['user_annotated'], r['no_annotations'], r['mutation__locus']))
+
+    # Render the view
+    context = dict(references=references, gene=gene_name, mapper=modelChoiceMappers, path=request.path)
+    return render(request, 'annotations/gene.html', context)
+
+def details(request, ref_pk):
+    # Retrieve the annotations for this reference
+    ref = Reference.objects.get(pk=ref_pk)
+    annotations = Annotation.objects.filter(reference=ref)
+
+    # Initialize the context
+    context = dict(mutation=ref.mutation, ref=ref, user=request.user, annotations=annotations, path=request.path)
+
+    # Retrieve the annotation for the current user (if necessary)
+    if request.user.is_authenticated():
+        try:
+            user_annotation = Annotation.objects.get(user=request.user, reference=ref)
+            context['annotation_form'] = AnnotationForm(instance=user_annotation)
+            context['user_annotation'] = user_annotation
+        except Annotation.DoesNotExist:
+            context['annotation_form'] = AnnotationForm()
+    return render(request, 'annotations/details.html', context)
+
+# necessary for the typeahead code to get a list of genes
+def list_genes_as_json(request):
+    gene_list = map(lambda s: unicode(s), Gene.objects.values_list('name', flat=True))
+    gene_list.sort()
+    return JsonResponse({'genes': gene_list})
+
+def list_interactions(request, gene_names):
+    # if there is only one, list all, else list only those included
+    gene_list = gene_names.split(',')
+    if len(gene_list) > 1:
+        interxns = Interaction.objects.filter(source__in=gene_list, target__in=gene_list)
+    elif len(gene_list) == 1:
+        gene = gene_names
+        interxns = Interaction.objects.filter(Q(source=gene) | Q(target=gene) )
+
+    # identify which items have a user's vote
+    user_votes = {}
+    if request.user:
+        refs_with_vote = InteractionReference.objects.filter(
+            interaction__in = interxns,
+            interactionvote__user = request.user)
+        for ref in refs_with_vote:
+            user_votes[ref.pk] = ref.interactionvote_set.get(user = request.user).is_positive
+
+    context = dict(interactions = interxns,
+                   gene_list = gene_list,
+                   user_votes = user_votes,
+                   path=request.path,
+                   user=request.user)
+    
+    return render(request, 'annotations/interactions.html', context)
+
+### DELETE operations
 ## todo: improve redirect behavior for these so that they return ajax type responses which pages absorb
 @login_required
 def remove_annotation(request, gene_name, ref_pk):
@@ -335,7 +348,3 @@ def remove_interaction(request, interaction_pk):
     # todo: send json redirect or return to the referring page
     return redirect('profile')
 
-def list_genes_as_json(request):
-    gene_list = map(lambda s: unicode(s), Gene.objects.values_list('name', flat=True))
-    gene_list.sort()
-    return JsonResponse({'genes': gene_list})
