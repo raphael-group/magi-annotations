@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load annotation_filters %}
 {% load annotation_tags %}
 {% block title %}Protein-protein interactions for {{ gene_list|join:"," }}{% endblock %}
 {% block content %}
@@ -23,12 +24,22 @@
 		  {% ref_link ref.identifier ref.db %}
 	  </td>
 	  <td> {{ ref.vote_count }} </td> {# todo: count negative/positive #}
-	  <td>
+	  <td>	    
 	      {% if user %}
+	      {% with pk=ref.pk %}
 	      <ul style='padding-left:12px'>
-		      <li><a href='#' class='vote upvote' refId='{{ ref.id }}'> Upvote</a></li>
-		      <li><a href='#' class='vote downvote' refId='{{ ref.id }}'> Downvote</a></li>
+		      {% if pk not in user_votes %}
+		      <li><a href='#' class='vote upvote' refId='{{ pk }}'> Upvote</a></li>
+		      <li><a href='#' class='vote downvote' refId='{{ pk }}'> Downvote</a></li>
+		      {% elif user_votes|get_item:pk %}
+		      <li><a href='#' class='vote remove-vote' refId='{{ pk }}'> Remove upvote</a></li>
+		      <li><a href='#' class='vote downvote' refId='{{ pk }}'> Downvote</a></li>
+		      {% else %}
+		      <li><a href='#' class='vote upvote' refId='{{ pk }}'> Upvote</a></li>
+		      <li><a href='#' class='vote remove-vote' refId='{{ pk }}'> Remove downvote</a></li>
+		      {% endif %}
 	      </ul>
+	      {% endwith %}
 	      {% endif %}        
 	  </td>
   </tr>
@@ -39,7 +50,7 @@
 	  <td style='border-right:1px solid #000'>{{ interxn.input_source }}</td>
 	  <td> None </td>
 	  <td> 0 </td>
-	  <td> Add a reference for this interaction </td>
+	  <td> No reference to vote on. </td>
   </tr>
   
   {% endfor %}
@@ -51,6 +62,7 @@
 	{% csrf_token %}
 	<input type='hidden' name='refId' id='refId'>
 	<input type='hidden' name='is_positive' id='is_positive'>
+	<input type='hidden' name='delete' id='delete'>
 </form>
 {% endblock %}
 {% block scripts %}
@@ -63,6 +75,7 @@ hiddenForm = $('form#vote');
 		  var link = $(this);
 		  hiddenForm.children('#refId').val(link.attr('refId'));
 		  hiddenForm.children('#is_positive').val(link.hasClass('upvote'));
+		  hiddenForm.children('#delete').val(link.hasClass('remove-vote'));
 		  hiddenForm.submit();
 	  });
   });

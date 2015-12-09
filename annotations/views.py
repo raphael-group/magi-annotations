@@ -2,11 +2,12 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from .models import *
 from .forms import *
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Case, Value, When
 from django.db import IntegrityError, transaction
 from django.contrib.auth.decorators import login_required
 from collections import defaultdict
 from django.forms import inlineformset_factory
+from django.core.exceptions import ObjectDoesNotExist
 
 # Create your views here.
 def index(request):
@@ -218,8 +219,19 @@ def list_interactions(request, gene_names):
         gene = gene_names
         interxns = Interaction.objects.filter(Q(source=gene) | Q(target=gene) )
 
+    # identify which items have a user's vote
+    user_votes = {}
+    if request.user:
+        refs_with_vote = InteractionReference.objects.filter(
+            interaction__in = interxns,
+            interactionvote__user = request.user)
+        for ref in refs_with_vote:
+            user_votes[ref.pk] = ref.interactionvote_set.get(user = request.user).is_positive
+
+#    print user_votes
     context = dict(interactions = interxns,
                    gene_list = gene_list,
+                   user_votes = user_votes,
                    path=request.path,
                    user=request.user)
     
@@ -249,8 +261,6 @@ def add_interactions(request):
             interxn = Interaction.getExact(interaction_form.cleaned_data)
                        
         if interxn:
-            # todo: if the gene is not known, then insert it?
-            # this is an issue only when editable fields are made
             ref_id = interaction_form.cleaned_data['reference_identifier'] # create
             db = interaction_form.cleaned_data['db']
             if ref_id:
@@ -273,25 +283,38 @@ def add_interactions(request):
                            interaction_form = interaction_form))
 
 @login_required
+# todo: sho
 def vote_interaction_ref(request):
     if request.method == 'POST':
         this_ref = InteractionReference.objects.get(id=request.POST.get('refId'));
         this_interxn = this_ref.interaction;
 
-        vote_direction = request.POST.get('is_positive') == 'true'
-        vote = InteractionVote(user = request.user,
-                               reference = this_ref,
-                               is_positive = vote_direction)
-        try:
-            vote.save()
-        except IntegrityError as err: # todo: check specifically for duplicate error
-            existing_vote = InteractionVote.objects.get(user = request.user,
-                               reference = this_ref)
-            existing_vote.is_positive = vote_direction
-            existing_vote.save()
+        if request.POST.get('delete') == 'true':
+            try:
+                existing_vote = InteractionVote.objects.get(user = request.user,
+                                reference = this_ref)
 
-            # todo: send json redirect or return to the referring page
+                existing_vote.delete()
+            except ObjectDoesNotExist: # nothing to delete
+                print "Warning: Attempt to delete non-existent vote for %s, reference %s " % (request.user, this_ref.identifier)
+
+        else: 
+            vote_direction = request.POST.get('is_positive') == 'true'
+            vote = InteractionVote(user = request.user,
+                                   reference = this_ref,
+                                   is_positive = vote_direction)
+            try:
+                vote.save()
+            except IntegrityError as err: # todo: check specifically for duplicate error
+                existing_vote = InteractionVote.objects.get(user = request.user,
+                                                        reference = this_ref)
+                existing_vote.is_positive = vote_direction
+                existing_vote.save()
+
+        # todo: send json redirect or return to the referring page
         return redirect('annotations:list_interactions', this_interxn.source.name + ',' + this_interxn.target.name)
+
+    # should never GET
 
 @login_required
 def remove_interaction_vote(request, vote_id):
