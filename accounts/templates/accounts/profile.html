@@ -86,6 +86,36 @@
   {% endfor %}
 </div>
 
+<div id="user-interactions">
+  <h4> Your Interactions </h4>
+  {% for reference in user.interactionreference_set.all %} 
+  {% if forloop.first %}
+  <table class='table table-striped'>
+    <thead><tr>
+	<th>Source</th>
+	<th class='thin-border-right'>Target</th>
+	<th>Reference</th>
+	<th>Votes</th>
+	<th>Delete?</th>
+    </tr></thead>
+    <tbody>
+  {% endif %}
+      <tr>
+	<td>{{ reference.interaction.source }}</td>
+	<td class='thin-border-right'>{{ reference.interaction.target }}</td>
+	<td>{% ref_link reference.identifier 'PMID' %}</td>
+	<td> {{ reference.vote_count }} </td>
+	<td> <a href="{% url 'annotations:remove_interaction' reference.id %}"'>Delete</td>
+      </tr>
+  {% if forloop.last %}
+    </tbody>
+  </table>
+  {% endif %}
+  {% empty %}
+  <p> You have not annotated any reference mutations. </p>
+  {% endfor %}
+</div>
+
 <div id="user-interactions-votes">
   <h4> Your Interaction Votes </h4>
   {% for vote in user.interactionvote_set.all %} 
@@ -95,7 +125,7 @@
 	<th>Source</th>
 	<th class='thin-border-right'>Target</th>
 	<th>Reference</th>
-	<th>Vote</th>
+	<th>Your Vote</th>
 	<th>Delete?</th>
     </tr></thead>
     <tbody>

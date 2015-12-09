@@ -194,21 +194,6 @@ def plus_one(request, gene_name):
     # Redirect to the gene page in question
     return redirect('annotations:gene', gene_name=gene_name)
 
-## todo: improve redirect behavior for these so that they return ajax type responses which pages absorb
-@login_required
-def remove_annotation(request, gene_name, ref_pk):
-    ref = Reference.objects.get(pk=ref_pk)
-    A = Annotation.objects.all().filter(user=request.user, reference=ref)
-    A.delete()
-    return redirect('annotations:gene', gene_name=gene_name)
-
-## todo: improve redirect behavior for these so that they return ajax type responses which pages absorb
-@login_required
-def remove_reference(request, ref_pk):
-    A = Reference.objects.get(user=request.user, pk=ref_pk)
-    A.delete()
-    return redirect('profile')
-
 
 def list_interactions(request, gene_names):
     # if there is only one, list all, else list only those included
@@ -283,7 +268,6 @@ def add_interactions(request):
                            interaction_form = interaction_form))
 
 @login_required
-# todo: sho
 def vote_interaction_ref(request):
     if request.method == 'POST':
         this_ref = InteractionReference.objects.get(id=request.POST.get('refId'));
@@ -316,11 +300,38 @@ def vote_interaction_ref(request):
 
     # should never GET
 
+## todo: improve redirect behavior for these so that they return ajax type responses which pages absorb
+@login_required
+def remove_annotation(request, gene_name, ref_pk):
+    ref = Reference.objects.get(pk=ref_pk)
+    A = Annotation.objects.all().filter(user=request.user, reference=ref)
+    A.delete()
+    return redirect('annotations:gene', gene_name=gene_name)
+
+## todo: improve redirect behavior for these so that they return ajax type responses which pages absorb
+@login_required
+def remove_reference(request, ref_pk):
+    A = Reference.objects.get(user=request.user, pk=ref_pk)
+    A.delete()
+    return redirect('profile')
+
 @login_required
 def remove_interaction_vote(request, vote_id):
     this_vote = InteractionVote.objects.get(id=vote_id)
     if request.user == this_vote.user:
         this_vote.delete()
+    else:
+        print "WARNING: attempt to delete vote %s by non-owner %s" % (this_vote, request.user)
+    # todo: send json redirect or return to the referring page
+    return redirect('profile')
+
+@login_required
+def remove_interaction(request, interaction_pk):
+    this_interaction = InteractionReference.objects.get(id=interaction_pk)
+    if request.user == this_interaction.user:
+        this_interaction.delete()
+    else:
+        print "WARNING: attempt to delete interaction %s by non-owner %s" % (this_interaction, request.user)
     # todo: send json redirect or return to the referring page
     return redirect('profile')
 
