@@ -1,1 +1,12 @@
-python annotations/fixtures/networksToFixture.py -o annotations/fixtures/all-networks -nf ../magi/data/ppis/hint-annotated.tsv ../magi/data/ppis/hprd-annotated.tsv ../magi/data/ppis/iref9-annotated.tsv ../magi/data/ppis/multinet.tsv
+#!/bin/bash
+
+NETWORK_STEMS="hint-annotated hprd-annotated iref9-annotated multinet"
+NETWORK_DIR="../../../magi/data/ppis"
+
+NETWORK_FILES=""
+for stem in $NETWORK_STEMS;
+do
+	 NETWORK_FILES="${NETWORK_FILES} ${NETWORK_DIR}/${stem}.tsv"
+done
+
+python networksToFixture.py -o all-networks -nf ${NETWORK_FILES} 
