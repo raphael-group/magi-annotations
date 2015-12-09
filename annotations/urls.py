@@ -11,7 +11,9 @@ urlpatterns = [
     url(r'^details/(?P<ref_pk>[0-9]+)/$', views.details, name='details'),
     url(r'^save/(?P<annotation_pk>[0-9]+)/$', views.save, name='update'),
     url(r'^plus_one/(?P<gene_name>[A-Za-z0-9]+)/$', views.plus_one, name='plus_one'),
+
     url(r'^remove_annotation/(?P<gene_name>[A-Za-z0-9]+)/(?P<ref_pk>[0-9]+)/$', views.remove_annotation, name='remove_annotation'),
+    url(r'^remove_reference/(?P<ref_pk>[0-9]+)/$', views.remove_reference, name='remove_reference'),
 
     url(r'^interactions/add/$', views.add_interactions, name='add_interactions'),
     url(r'^interactions/vote/$', views.vote_interaction_ref, name='vote_interactions'),

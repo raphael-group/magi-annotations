@@ -71,10 +71,11 @@ class Mutation(models.Model):
         unique_together = (("gene","locus","original_amino_acid","new_amino_acid","mutation_type","mutation_class"))
 
 class Reference(models.Model):
-    identifier = models.CharField(max_length=30)
-    db = models.CharField(max_length=30, choices=dbChoices)
-    source = models.CharField(max_length=30, choices=referenceSourceChoices)
-    mutation = models.ForeignKey(Mutation)
+    identifier       = models.CharField(max_length=30)
+    db               = models.CharField(max_length=30, choices=dbChoices)
+    source           = models.CharField(max_length=30, choices=referenceSourceChoices)
+    mutation         = models.ForeignKey(Mutation)
+    user             = models.ForeignKey(User, null=True, blank=True)
     last_edited      = models.DateField(auto_now=True)
     created_on       = models.DateField(auto_now_add=True)
 

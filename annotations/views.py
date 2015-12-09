@@ -94,6 +94,7 @@ def saveMutation(request):
             if refForm.is_valid(): 
                 validRef = refForm.save(commit=False)
                 validRef.source = 'Community'
+                validRef.user = request.user
                 validRef.save()
             elif refForm.non_field_errors().as_text() == "* Reference is not unique.":
                 validRef = Reference.getExact(refForm.cleaned_data)
@@ -190,12 +191,21 @@ def plus_one(request, gene_name):
     # Redirect to the gene page in question
     return redirect('annotations:gene', gene_name=gene_name)
 
+## todo: improve redirect behavior for these so that they return ajax type responses which pages absorb
 @login_required
 def remove_annotation(request, gene_name, ref_pk):
     ref = Reference.objects.get(pk=ref_pk)
     A = Annotation.objects.all().filter(user=request.user, reference=ref)
     A.delete()
     return redirect('annotations:gene', gene_name=gene_name)
+
+## todo: improve redirect behavior for these so that they return ajax type responses which pages absorb
+@login_required
+def remove_reference(request, ref_pk):
+    A = Reference.objects.get(user=request.user, pk=ref_pk)
+    A.delete()
+    return redirect('profile')
+
 
 def list_interactions(request, gene_names):
     # if there is only one, list all, else list only those included
