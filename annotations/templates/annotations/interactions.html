@@ -11,8 +11,12 @@
     <th>Target</th>
     <th style='border-right:1px solid #000'>Network</th>
     <th>Reference</th>
-    <th>Votes</th> 
-    <th>Annotate</th>
+    <th>Votes</th>
+    <th>Annotate
+	    {% if not user.is_authenticated %}
+	    (You must be logged in.)
+	    {% endif %}
+    </th>
   </tr>
   {% for interxn in interactions %}
   {% for ref in interxn.interactionreference_set.all %}
@@ -24,7 +28,7 @@
 		  {% ref_link ref.identifier ref.db %}
 	  </td>
 	  <td> {{ ref.vote_count }} </td>
-	  <td>	    
+	  <td>
 	      {% if user %}
 	      {% with pk=ref.pk %}
 	      <ul style='padding-left:12px'>
@@ -40,7 +44,7 @@
 		      {% endif %}
 	      </ul>
 	      {% endwith %}
-	      {% endif %}        
+	      {% endif %}
 	  </td>
   </tr>
   {% empty %}
@@ -52,7 +56,7 @@
 	  <td> 0 </td>
 	  <td> No reference to vote on. </td>
   </tr>
-  
+
   {% endfor %}
     {% empty %}
     <tr><td colspan='6' style='text-align:center'>Sorry, no interactions for {{ gene_list|join:"," }}.</td></tr>

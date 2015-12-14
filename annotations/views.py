@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from collections import defaultdict
 from django.forms import inlineformset_factory
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.models import AnonymousUser
 
 # Create your views here.
 
@@ -83,7 +84,7 @@ def saveMutation(request):
             refForm = referenceFormSet.extra_forms[0]
 
             validRef = None
-            if refForm.is_valid(): 
+            if refForm.is_valid():
                 validRef = refForm.save(commit=False)
                 validRef.source = 'Community'
                 validRef.user = request.user
@@ -100,7 +101,7 @@ def saveMutation(request):
                         annos = anno[0]
                         anno.user = request.user
                         anno.save()
-                    
+
                     # todo: respond to ajax request instead
                     return redirect('annotations:gene', gene_name=validMutation.gene)
 
@@ -164,7 +165,7 @@ def add_interactions(request):
             interxn.save()
         elif interaction_form.non_field_errors().as_text() == '* Interaction is not unique.':
             interxn = Interaction.getExact(interaction_form.cleaned_data)
-                       
+
         if interxn:
             ref_id = interaction_form.cleaned_data['reference_identifier'] # create
             db = interaction_form.cleaned_data['db']
@@ -177,7 +178,7 @@ def add_interactions(request):
                     attached_ref = InteractionReference(identifier=ref_id,
                                                     interaction = interxn,
                                                     db = db,
-                                                    user = request.user)                
+                                                    user = request.user)
                     attached_ref.save()
 
             return redirect('annotations:list_interactions', interxn.source.name + ',' + interxn.target.name)
@@ -203,7 +204,7 @@ def vote_interaction_ref(request):
             except ObjectDoesNotExist: # nothing to delete
                 print "Warning: Attempt to delete non-existent vote for %s, reference %s " % (request.user, this_ref.identifier)
 
-        else: 
+        else:
             vote_direction = request.POST.get('is_positive') == 'true'
             vote = InteractionVote(user = request.user,
                                    reference = this_ref,
@@ -218,8 +219,8 @@ def vote_interaction_ref(request):
 
         # todo: send json redirect or return to the referring page
         return redirect('annotations:list_interactions', this_interxn.source.name + ',' + this_interxn.target.name)
-
-    # should never GET
+    else: # should never GET
+        return redirect('profile')
 
 
 ## RETRIEVE operations
@@ -297,7 +298,7 @@ def list_interactions(request, gene_names):
 
     # identify which items have a user's vote
     user_votes = {}
-    if request.user:
+    if request.user.is_authenticated():
         refs_with_vote = InteractionReference.objects.filter(
             interaction__in = interxns,
             interactionvote__user = request.user)
@@ -309,7 +310,7 @@ def list_interactions(request, gene_names):
                    user_votes = user_votes,
                    path=request.path,
                    user=request.user)
-    
+
     return render(request, 'annotations/interactions.html', context)
 
 ### DELETE operations
@@ -347,4 +348,3 @@ def remove_interaction(request, interaction_pk):
         print "WARNING: attempt to delete interaction %s by non-owner %s" % (this_interaction, request.user)
     # todo: send json redirect or return to the referring page
     return redirect('profile')
-
