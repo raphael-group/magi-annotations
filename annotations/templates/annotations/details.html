@@ -72,9 +72,9 @@ Annotations for {{ mutation.gene }} ({{ mutation.original_amino_acid}}{{ mutatio
       <tr style='{% if user.is_authenticated and A.user.pk == user.pk %}background:lightyellow;{% endif %}'>
         <td>{{ A.last_edited }}</td>
         <td>{{ A.cancer|default:'Unknown'}}</td>
-        <td>{{ A.get_heritable_display|default:'Unknown'}}</td>
-        <td>{{ A.get_measurement_type_display|default:'Unknown'}}</td>
-        <td>{{ A.get_characterization_display|default:'Unknown'}}</td>
+        <td>{{ A.get_heritable_display }}</td>
+        <td>{{ A.get_measurement_type_display }}</td>
+        <td>{{ A.get_characterization_display }}</td>
         <td>{{ A.comment|default:'None' }}</td>
       </tr>
       {% endfor %}

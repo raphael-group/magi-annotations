@@ -8,11 +8,11 @@ from django import forms
 # CONSTANTS
 mutationTypeChoices  = (('MS', 'Missense'), ('NS', 'Nonsense'), ('FSI', 'Frame-Shift Insertion'), ('IFD', 'In-Frame Deletion'), ('FSD', 'Frame-Shift Deletion'), ('IFI', 'In-Frame Insertion'))
 mutationClassChoices = (('SNV', 'Single Nucleotide Variant'), ('indel', 'Small insertion/deletion'))
-heritableChoices     = (('G', 'Germline'), ('S', 'Somatic'))
+heritableChoices     = (('G', 'Germline'), ('S', 'Somatic'), ('', 'Unknown'))
 referenceSourceChoices = (('C', 'Community'), ('DoCM', 'Database of Curated Mutations'), ('PMC Search', 'PubMed Central Search'))
 dbChoices = (('PMID', 'PubMed'), ('PMC', 'PubMed Central'))
-measurementChoices = (('WXS', 'Whole-Exome Sequencing'), ('WGS', 'Whole-Genome Sequencing'), ('TS', 'Targeted Sequencing'))
-characterizationChoices = (('F', 'Functional'), ('O', 'Observational'))
+measurementChoices = (('WXS', 'Whole-Exome Sequencing'), ('WGS', 'Whole-Genome Sequencing'), ('TS', 'Targeted Sequencing'), ('', 'Unknown'))
+characterizationChoices = (('F', 'Functional'), ('O', 'Observational'), ('', 'Unknown'))
 modelChoiceMappers = dict(measurement_type=dict(measurementChoices),
                           characterization=dict(characterizationChoices),
                           heritable=dict(heritableChoices))
@@ -90,15 +90,6 @@ class Annotation(models.Model):
 
     def __unicode__(self):
         return 'Annotation: ' + unicode(self.reference)
-
-    def heritable_mapped(self):
-        return heritableChoices.get(self.heritable, 'Unknown')
-
-    def measurement_mapped(self):
-        return measurementChoices.get(self.measurement_type, "Unknown")
-
-    def characterization_mapped(self):
-        return characterizationChoices.get(self.characterization, "Unknown")
 
 # protein-protein interactions
 class Interaction(models.Model):
