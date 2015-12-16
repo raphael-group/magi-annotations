@@ -6,12 +6,12 @@ urlpatterns = [
     url(r'^$', views.index, name='index'),
 
     # todo: how can we make our API more consistent?
-    url(r'^save/$', views.save, name='save'),
+    url(r'^save/$', views.save_annotation_only, name='save'),
     url(r'^(?P<gene_name>[A-Za-z0-9]+)/$', views.gene, name='gene'),
-    url(r'^save/mutation/$', views.saveMutation, name='saveMutation'),
-    url(r'^create/mutation/$', views.saveMutation, name='createMutation'),
+    url(r'^save/mutation/$', views.save_mutation, name='saveMutation'),
+    url(r'^create/mutation/$', views.save_mutation, name='createMutation'),
     url(r'^details/(?P<ref_pk>[0-9]+)/$', views.details, name='details'),
-    url(r'^save/(?P<annotation_pk>[0-9]+)/$', views.save, name='update'),
+    url(r'^save/(?P<annotation_pk>[0-9]+)/$', views.save_annotation_only, name='update'),
     url(r'^plus_one/(?P<gene_name>[A-Za-z0-9]+)/$', views.plus_one, name='plus_one'),
 
     url(r'^interactions/add/$', views.add_interactions, name='add_interactions'),
@@ -26,3 +26,20 @@ urlpatterns = [
     url(r'^remove_interaction/(?P<interaction_pk>[0-9]+)/$', views.remove_interaction, name='remove_interaction'),
     url(r'^interactions/vote/(?P<vote_id>[0-9]+)/delete$', views.remove_interaction_vote, name='remove_interaction_vote'), 
 ]
+
+# todo: implement this URI scheme and change link-django-annos branch to map to these
+# /mutations/new/ 
+# /mutations/create/
+# /mutations/gene/<gene>
+# /mutations/reference/<pk> (GET/POST)
+# /mutations/reference/<pk>/delete
+# /mutations/reference/<pk>/annotation/delete
+# /mutations/reference/<pk>/plus_one/
+
+# /interactions/new/
+# /interactions/create/
+# /interactions/genes/<gene-list>
+# /interactions/<pk>/vote/ (POST)
+# /interactions/<pk>/vote/delete 
+# /interactions/<pk>/delete
+

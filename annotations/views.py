@@ -14,14 +14,14 @@ from django.contrib.auth.models import AnonymousUser
 
 ## CREATE operations ##
 @login_required
-def save(request, annotation_pk=None): # create a single mutation reference annotation
+def save_annotation_only(request, annotation_pk=None): # create a single mutation reference annotation
     # Try to get the annotation and update it
     if annotation_pk is not None:
         instance = Annotation.objects.get(pk=annotation_pk)
         ref      = instance.reference
         form     = AnnotationForm(instance=instance, data=request.POST)
-        # Make sure that the
-        if request.user.pk != instance.user.pk:
+        # Make sure that the user is the same
+        if request.user != instance.user:
             return redirect('annotations:details', ref_pk=ref.pk)
 
     # Otherwise we're making a new annotation
@@ -40,10 +40,20 @@ def save(request, annotation_pk=None): # create a single mutation reference anno
 
     return redirect('annotations:details', ref_pk=ref.pk)
 
+def prefill_forms(query_params, *forms):
+    initialForms = []
+    for field, value in request.GET.iteritems():
+        for i, form in enumerate(forms):
+            if field in form.Meta.fields:
+                pass
+            
+    return initialForms
 @login_required
 # create a mutation and reference and (optionally) an annotation
 # todo: these should be atomic transactions
-def saveMutation(request):
+def save_mutation(request):
+    # Formsets allow us to build one formset on top of another, but a compound form may be clearer
+    # this will be improved in the CNA branch
     MutRefFormSet = inlineformset_factory(Mutation, Reference, form=ReferenceForm,
                                           extra=1,can_delete=False)
     RefAnnoFormSet = inlineformset_factory(Reference, Annotation, form=AnnotationForm,
@@ -75,7 +85,7 @@ def saveMutation(request):
         if mutationForm.is_valid():
             validMutation = mutationForm.save()
         elif mutationForm.non_field_errors().as_text() == "* Mutation is not unique.":
-            validMutation = Mutation.getExact(mutationForm.cleaned_data)
+            validMutation = Mutation.objects.get(**mutationForm.cleaned_data)
 
         if validMutation:
              # only the first reference form is important
@@ -90,7 +100,8 @@ def saveMutation(request):
                 validRef.user = request.user
                 validRef.save()
             elif refForm.non_field_errors().as_text() == "* Reference is not unique.":
-                validRef = Reference.getExact(refForm.cleaned_data)
+                del refForm.cleaned_data['id']
+                validRef = Reference.objects.get(**refForm.cleaned_data)
 
             if validRef:
                 annotationFormSet = RefAnnoFormSet(request.POST, request.FILES,
@@ -98,7 +109,7 @@ def saveMutation(request):
                 if annotationFormSet.is_valid():
                     annos = annotationFormSet.save(commit=False)
                     if annos:
-                        annos = anno[0]
+                        anno = annos[0]
                         anno.user = request.user
                         anno.save()
 
@@ -164,7 +175,10 @@ def add_interactions(request):
             interxn = interaction_form.save(commit = False)
             interxn.save()
         elif interaction_form.non_field_errors().as_text() == '* Interaction is not unique.':
-            interxn = Interaction.getExact(interaction_form.cleaned_data)
+            dist_data = {k: v for (k, v) in interaction_form.cleaned_data.items()
+                         if k in Interaction._meta.get_all_field_names()}
+            interxn = Interaction.objects.get(**dist_data)
+            
 
         if interxn:
             ref_id = interaction_form.cleaned_data['reference_identifier'] # create

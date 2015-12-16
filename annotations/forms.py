@@ -2,16 +2,9 @@ from django import forms
 from django.forms import ModelForm, Textarea
 from .models import *
 
-def validate_gene(val):
-    if Gene.objects.filter(name=val).count() > 0:
-        return True
-    else:
-        raise ValidationError(_('Gene %(value)s not known'),
-                                code='Unknown',
-                                params = {'value': val})
-
 ### set up gene fields to be typehaead autocomplete fields
 class GeneWidget(forms.TextInput):
+    ## we ensure that the html renders with class='gene-typeahead'
     def __init__(self, *args, **kwargs):
         if 'attrs' not in kwargs:
             kwargs['attrs'] = {'class': 'gene-typeahead'}
@@ -22,7 +15,7 @@ class GeneWidget(forms.TextInput):
 
         super(forms.TextInput, self).__init__(*args, **kwargs)
 
-### note: in the template, the form's media must be included in scripts block
+    ### note: in the template, the form's media must be included in scripts block
     class Media:
         js = ('components/d3/d3.min.js',
               'components/typeahead.js/dist/typeahead.bundle.min.js',
@@ -31,6 +24,14 @@ class GeneWidget(forms.TextInput):
 
 class GeneField(forms.CharField):
     description = "typeahead field for selecting genes"
+
+    def validate_gene(val):
+        if Gene.objects.filter(name=val).count() > 0:
+            return True
+        else:
+            raise ValidationError(_('Gene %(value)s not known'),
+                                  code='Unknown',
+                                  params = {'value': val})
 
     ### note: by validating this way, we only accept annotations for genes we know about
     default_validators = [validate_gene]

@@ -30,8 +30,8 @@ class Cancer(models.Model):
 class Gene(models.Model):
     name = models.CharField(max_length=30, primary_key = True)
     chromosome = models.CharField(max_length=2, null = True)
-    locus_begin = models.IntegerField(null = True)
-    locus_end = models.IntegerField(null = True)
+    start_pos = models.IntegerField(null = True)
+    end_pos = models.IntegerField(null = True)
     def __unicode__(self):
         return unicode(self.name)
 
@@ -45,27 +45,19 @@ class Mutation(models.Model):
     last_edited         = models.DateField(auto_now=True)
     created_on          = models.DateField(auto_now_add=True)
 
-    def __unicode__(self):
-        return '{}:{}{}{} ({} {})'.format(self.gene, self.original_amino_acid, self.locus, self.new_amino_acid, self.mutation_type, self.mutation_class)
-
+    # full protein sequence change for display purposes
     def full_change(self):
         return self.original_amino_acid + str(self.locus) + self.new_amino_acid
 
+    def __unicode__(self):
+        return '{}:{} ({} {})'.format(self.gene, self.full_change(), self.mutation_type, self.mutation_class)
+
+    # additional integrity constraints on mutation data that can't be checked solely on type
     def clean(self):
         if self.locus <= 0:
             raise ValidationError({'locus': _('Locus should be positive.')})
         if self.original_amino_acid == self.new_amino_acid:
             raise ValidationError({'new_amino_acid': _('New amino acid must be different from original.')})
-
-    @staticmethod
-    def getExact(mutationDict):
-        return Mutation.objects.get(
-            gene=mutationDict['gene'],
-            mutation_type=mutationDict['mutation_type'],
-            mutation_class=mutationDict['mutation_class'],
-            locus=mutationDict['locus'],
-            original_amino_acid=mutationDict['original_amino_acid'],
-            new_amino_acid=mutationDict['new_amino_acid'])
 
     class Meta:
         unique_together = (("gene","locus","original_amino_acid","new_amino_acid","mutation_type","mutation_class"))
@@ -81,13 +73,6 @@ class Reference(models.Model):
 
     def __unicode__(self):
         return '{} {} for {} ({})'.format(self.db, self.identifier, self.mutation, self.source)
-
-    @staticmethod
-    def getExact(refDict):
-        return Reference.objects.get(
-            identifier=refDict['identifier'],
-            db=refDict['db'],
-            mutation=refDict['mutation'].pk)
 
     class Meta:
         unique_together = (('identifier', 'db', 'mutation'))
@@ -107,40 +92,31 @@ class Annotation(models.Model):
         return 'Annotation: ' + unicode(self.reference)
 
     def heritable_mapped(self):
-        if self.heritable in heritableChoices:
-            return heritableChoices[self.heritable]
-        return "Unknown"
+        return heritableChoices.get(self.heritable, 'Unknown')
 
     def measurement_mapped(self):
-        if self.measurement_type in measurementChoices:
-            return measurementChoices[self.measurement_type]
-        return "Unknown"
+        return measurementChoices.get(self.measurement_type, "Unknown")
 
     def characterization_mapped(self):
-        if self.characterization in characterizationChoices:
-            return characterizationChoices[self.characterization]
-        return "Unknown"
+        return characterizationChoices.get(self.characterization, "Unknown")
 
 # protein-protein interactions
 class Interaction(models.Model):
     source = models.ForeignKey(Gene, related_name='source')
     target = models.ForeignKey(Gene, related_name='target')
-    input_source = models.CharField(max_length=25) # answers: which network does this come from?
+
+    # which protein-protein network is this from: HINT, HPRD, or from the community?
+    input_source = models.CharField(max_length=25)
     def __unicode__(self):
         return unicode(self.source) +  "->" +  unicode(self.target)
 
     class Meta:
         unique_together = (("source", "target", "input_source"))
 
-    @staticmethod
-    def getExact(inter_dict):
-        return Interaction.objects.get(source = inter_dict['source'],
-                                       target = inter_dict['target'],
-                                       input_source = inter_dict['input_source'])
-
 class InteractionReference(models.Model):
+    # the pubmed ID or pubmed central ID
     identifier = models.CharField(max_length=40)
-    db = models.CharField(max_length=30, choices=dbChoices) # reference source
+    db = models.CharField(max_length=30, choices=dbChoices) # reference source: Pubmed or Pubmed Central
     interaction = models.ForeignKey(Interaction)
     user = models.ForeignKey(User, null = True)
     def __unicode__(self):

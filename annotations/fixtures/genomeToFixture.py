@@ -17,8 +17,8 @@ with open(args.genome_file) as f:
         gene = dict(model='annotations.gene', fields = dict(
             name = gene,
             chromosome = chromosome,
-            locus_begin = int(start),
-            locus_end = int(end)))
+            start_pod = int(start),
+            end_pos = int(end)))
         genes.append(gene)
 
 with open(args.output_prefix + '-genome.json', 'w') as out:
