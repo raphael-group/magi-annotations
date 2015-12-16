@@ -12,6 +12,10 @@ from django.contrib.auth.models import AnonymousUser
 
 # Create your views here.
 
+def remove_extra_fields(data_dict, model_class):
+    return {k: v for (k, v) in data_dict.items()
+            if k in model_class._meta.get_all_field_names()}
+
 ## CREATE operations ##
 @login_required
 def save_annotation_only(request, annotation_pk=None): # create a single mutation reference annotation
@@ -85,7 +89,7 @@ def save_mutation(request):
         if mutationForm.is_valid():
             validMutation = mutationForm.save()
         elif mutationForm.non_field_errors().as_text() == "* Mutation is not unique.":
-            validMutation = Mutation.objects.get(**mutationForm.cleaned_data)
+            validMutation = Mutation.objects.get(**remove_extra_fields(mutationForm.cleaned_data, Mutation))
 
         if validMutation:
              # only the first reference form is important
@@ -101,7 +105,7 @@ def save_mutation(request):
                 validRef.save()
             elif refForm.non_field_errors().as_text() == "* Reference is not unique.":
                 del refForm.cleaned_data['id']
-                validRef = Reference.objects.get(**refForm.cleaned_data)
+                validRef = Reference.objects.get(**remove_extra_fields(refForm.cleaned_data, Reference))
 
             if validRef:
                 annotationFormSet = RefAnnoFormSet(request.POST, request.FILES,
@@ -175,9 +179,7 @@ def add_interactions(request):
             interxn = interaction_form.save(commit = False)
             interxn.save()
         elif interaction_form.non_field_errors().as_text() == '* Interaction is not unique.':
-            dist_data = {k: v for (k, v) in interaction_form.cleaned_data.items()
-                         if k in Interaction._meta.get_all_field_names()}
-            interxn = Interaction.objects.get(**dist_data)
+            interxn = Interaction.objects.get(**remove_extra_fields(interaction_form.cleaned_data, Interaction))
             
 
         if interxn:
