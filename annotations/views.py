@@ -10,11 +10,23 @@ from django.forms import inlineformset_factory
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import AnonymousUser
 
-# Create your views here.
-
+# utility functions
 def remove_extra_fields(data_dict, model_class):
     return {k: v for (k, v) in data_dict.items()
             if k in model_class._meta.get_all_field_names()}
+
+# use query parameters to fill forms
+def prefill_from_query_params(query_params, *form_list):
+    init_values = tuple([dict() for i in form_list])
+    for field, field_value in query_params.iteritems(): # convert query params to initialize model
+        for i, form in enumerate(form_list):
+            if field in form.Meta.fields:
+                init_values[i][field] = field_value
+
+    if len(init_values) == 1:
+        return init_values[0]
+    
+    return init_values
 
 ## CREATE operations ##
 @login_required
@@ -44,14 +56,6 @@ def save_annotation_only(request, annotation_pk=None): # create a single mutatio
 
     return redirect('annotations:details', ref_pk=ref.pk)
 
-def prefill_forms(query_params, *forms):
-    initialForms = []
-    for field, value in request.GET.iteritems():
-        for i, form in enumerate(forms):
-            if field in form.Meta.fields:
-                pass
-            
-    return initialForms
 @login_required
 # create a mutation and reference and (optionally) an annotation
 # todo: these should be atomic transactions
@@ -64,16 +68,7 @@ def save_mutation(request):
                                            extra=1,can_delete=False)
 
     if request.method == 'GET':
-        initialMutation, initialReference, initialAnnotation = dict(), dict(), dict()
-        for field in request.GET: # convert cgi params to initialize model
-            # todo: have caners use abbrevs as natural key to resolve cancers from strings rather than pks
-            if field in MutationForm.Meta.fields:
-                initialMutation[field] = request.GET[field]
-            elif field in ReferenceForm.Meta.fields:
-                initialReference[field] = request.GET[field]
-            elif field in AnnotationForm.Meta.fields:
-                initialAnnotation[field] = request.GET[field]
-
+        initialMutation, initialReference, initialAnnotation = prefill_from_query_params(request.GET, MutationForm, ReferenceForm, AnnotationForm)
         context = dict(path=request.path,
                        mutation_form=MutationForm(initial=initialMutation),
                        reference_form=MutRefFormSet(initial=[initialReference]),
@@ -120,7 +115,7 @@ def save_mutation(request):
                     # todo: respond to ajax request instead
                     return redirect('annotations:gene', gene_name=validMutation.gene)
 
-        # some save was invalid along the way
+        # render errors - some save was invalid along the way
         originalFormContext = dict(path=request.path,
                                    mutation_form = mutationForm,
                                    reference_form = referenceFormSet,
@@ -162,9 +157,8 @@ def plus_one(request, gene_name):
 # todo: these should be atomic transactions
 def add_interactions(request):
     if request.method == 'GET':
-        initialInteraction = {'input_source': 'Community'}
-        for field in request.GET:
-            initialInteraction[field] = request.GET[field]
+        initialInteraction = prefill_from_query_params(request.GET, InteractionForm)
+        initialInteraction['input_source']= 'Community'
 
         base_form = InteractionForm(initial = initialInteraction)
         context = dict(path = request.path,
@@ -207,36 +201,37 @@ def add_interactions(request):
 @login_required
 # vote on an interaction, or modify an existing interaction vote
 def vote_interaction_ref(request):
-    if request.method == 'POST':
-        this_ref = InteractionReference.objects.get(id=request.POST.get('refId'));
-        this_interxn = this_ref.interaction;
-
-        if request.POST.get('delete') == 'true':
-            try:
-                existing_vote = InteractionVote.objects.get(user = request.user,
-                                reference = this_ref)
-
-                existing_vote.delete()
-            except ObjectDoesNotExist: # nothing to delete
-                print "Warning: Attempt to delete non-existent vote for %s, reference %s " % (request.user, this_ref.identifier)
-
-        else:
-            vote_direction = request.POST.get('is_positive') == 'true'
-            vote = InteractionVote(user = request.user,
-                                   reference = this_ref,
-                                   is_positive = vote_direction)
-            try:
-                vote.save()
-            except IntegrityError as err: # todo: check specifically for duplicate error
-                existing_vote = InteractionVote.objects.get(user = request.user,
-                                                        reference = this_ref)
-                existing_vote.is_positive = vote_direction
-                existing_vote.save()
-
-        # todo: send json redirect or return to the referring page
-        return redirect('annotations:list_interactions', this_interxn.source.name + ',' + this_interxn.target.name)
-    else: # should never GET
+    if request.method != 'POST':
         return redirect('profile')
+
+    # request.method == 'POST'
+    this_ref = InteractionReference.objects.get(id=request.POST.get('refId'));
+    this_interxn = this_ref.interaction;
+
+    if request.POST.get('delete') == 'true':
+        try:
+            existing_vote = InteractionVote.objects.get(user = request.user,
+                                                            reference = this_ref)
+
+            existing_vote.delete()
+        except ObjectDoesNotExist: # nothing to delete
+            print "Warning: Attempt to delete non-existent vote for %s, reference %s " % (request.user, this_ref.identifier)
+
+    else:
+        vote_direction = request.POST.get('is_positive') == 'true'
+        vote = InteractionVote(user = request.user,
+                               reference = this_ref,
+                               is_positive = vote_direction)
+        try:
+            vote.save()
+        except IntegrityError as err: # todo: check specifically for duplicate error
+            existing_vote = InteractionVote.objects.get(user = request.user,
+                                                        reference = this_ref)
+            existing_vote.is_positive = vote_direction
+            existing_vote.save()
+
+    # todo: send json redirect or return to the referring page
+    return redirect('annotations:list_interactions', this_interxn.source.name + ',' + this_interxn.target.name)
 
 
 ## RETRIEVE operations
