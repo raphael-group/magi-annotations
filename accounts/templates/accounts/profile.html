@@ -70,9 +70,9 @@
 	<td>{% ref_link sourceAnno.reference.identifier sourceAnno.reference.db %}</td>
 <!--	<td>{{ sourceAnno.source }}</td> -->
 	<td>{{ sourceAnno.cancer|default:'Unknown' }}</td>
-	<td>{{ sourceAnno.get_heritable_display|default:'Unknown' }}</td>
-	<td>{{ sourceAnno.get_measurement_type_display|default:'Unknown' }}</td>
-	<td>{{ sourceAnno.get_characterization_display|default:'Unknown' }}</td>
+	<td>{{ sourceAnno.get_heritable_display }}</td>
+	<td>{{ sourceAnno.get_measurement_type_display }}</td>
+	<td>{{ sourceAnno.get_characterization_display }}</td>
 	<td><ul>
 	    <li><a href='{% url 'annotations:details' ref_pk=sourceAnno.reference.pk %}'>Edit</a></li>
 	    <li><a href='{% url 'annotations:remove_annotation' gene_name=sourceAnno.reference.mutation.gene ref_pk=sourceAnno.reference.pk %}'>Remove</a></li>
@@ -134,7 +134,7 @@
 	<td>{{ vote.reference.interaction.source }}</td>
 	<td class='thin-border-right'>{{ vote.reference.interaction.target }}</td>
 	<td>{% ref_link vote.reference.identifier 'PMID' %}</td>
-	<td>{{ vote.is_positive|yesno }}</td>
+	<td>{{ vote.is_positive|yesno:"Agree,Disagree,No comment" }}</td>
 	<td> <a href="{% url 'annotations:remove_interaction_vote' vote.id %}"'>Delete</td>
       </tr>
   {% if forloop.last %}

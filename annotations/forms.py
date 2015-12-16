@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import ModelForm, Textarea
 from .models import *
+from django.utils.translation import ugettext as _
 
 ### set up gene fields to be typehaead autocomplete fields
 class GeneWidget(forms.TextInput):
@@ -29,7 +30,7 @@ class GeneField(forms.CharField):
         if Gene.objects.filter(name=val).count() > 0:
             return True
         else:
-            raise ValidationError(_('Gene %(value)s not known'),
+            raise ValidationError(_('Gene %(value)s not found in genome'),
                                   code='Unknown',
                                   params = {'value': val})
 
