@@ -236,7 +236,13 @@ def vote_interaction_ref(request):
 
 ## RETRIEVE operations
 def index(request):
-    return HttpResponse("Hello, world. You're at the annotations index.")
+    context = dict(path=request.path)
+    return render(request, 'annotations/index.html', context)
+
+def index_interactions(request):
+    context = dict(path=request.path)
+    return render(request, 'annotations/index_interactions.html', context)
+
 
 def gene(request, gene_name):
     # List of fields we want to display for our references

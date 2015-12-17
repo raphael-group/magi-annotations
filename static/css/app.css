@@ -17,7 +17,7 @@ h1, h2, h3, h4, h5{
 div#content{padding:15px;clear:both;}
 
 /* Header */
-div.navbar {
+div.navbar, div.navbar .dropdown-menu, div.navbar .dropdown-menu .dropdown-menu>li>a {
   background: #333;
   border:none;
   border-bottom: 2px solid #8cc63f;
@@ -34,7 +34,7 @@ ul.nav li a:hover {
   color: #6b73b5 !important;
   font-weight: bold;
 }
-#topNavList ul.nav li a {
+#topNavList ul.nav li a{
   margin-top: 10px;
   padding: 5px 15px;
 }

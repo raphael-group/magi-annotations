@@ -7,6 +7,7 @@ urlpatterns = [
 
     # todo: how can we make our API more consistent?
     url(r'^save/$', views.save_annotation_only, name='save'),
+    url(r'^$', views.gene, name='gene_search'),
     url(r'^(?P<gene_name>[A-Za-z0-9]+)/$', views.gene, name='gene'),
     url(r'^save/mutation/$', views.save_mutation, name='saveMutation'),
     url(r'^create/mutation/$', views.save_mutation, name='createMutation'),
@@ -14,6 +15,8 @@ urlpatterns = [
     url(r'^save/(?P<annotation_pk>[0-9]+)/$', views.save_annotation_only, name='update'),
     url(r'^plus_one/(?P<gene_name>[A-Za-z0-9]+)/$', views.plus_one, name='plus_one'),
 
+
+    url(r'^interactions/search/$', views.index_interactions, name='index_interactions'),
     url(r'^interactions/add/$', views.add_interactions, name='add_interactions'),
     url(r'^interactions/vote/$', views.vote_interaction_ref, name='vote_interactions'),
     url(r'^interactions/(?P<gene_names>[A-Za-z0-9,]+)/$', views.list_interactions, name='list_interactions'),

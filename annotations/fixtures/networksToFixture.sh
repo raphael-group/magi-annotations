@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# file stems and locations of network files
 NETWORK_STEMS="hint-annotated hprd-annotated iref9-annotated multinet"
 NETWORK_DIR="../../../magi/data/ppis"
 
