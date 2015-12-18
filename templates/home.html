@@ -2,12 +2,14 @@
 {% block title %}MAGI annotations{% endblock %}
 {% block content %}
 <h1>Welcome to MAGI annotations</h1>
-<h5>Apps</h5>
+<h5>View expert user annotations of mutations and protein interactions. </h5>
+<br/>
+<p><u>Places to get started:</u></p>
 <ul>
-  <li><a href='{% url 'annotations:gene' 'PDGFRA' %}'>Annotations (default <i>PDGFRA</i>)</a></li>
+  <li><a href='{% url 'annotations:gene' 'PDGFRA' %}'>View cancer mutation annotations for a gene</a></li>
   <li><a href='{% url 'annotations:createMutation'  %}'>Create a new mutation and reference</a></li>
-  <li><a href='{% url 'annotations:list_interactions' 'STAG2' %}'>View interactions (default <i>STAG2</i>)</a></li>
+  <li><a href='{% url 'annotations:list_interactions' 'STAG2' %}'>View protein interactions (default <i>STAG2</i>)</a></li>
   <li><a href='{% url 'annotations:add_interactions' %}'>Add an interaction </a></li>
-  <li><a href='{% url 'profile' %}'>Accounts</a></li>
+  <li><a href='{% url 'profile' %}'>View your activity</a></li>
 </ul>
 {% endblock %}

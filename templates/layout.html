@@ -48,6 +48,11 @@
                 </div>
               </div>
             </div>
+            <ul class="nav navbar-nav navbar-cener" style="color:grey">
+	      <li>
+		<a href="{% node_magi_url '/' %}"><button class="btn btn-danger btn-xs">MAGI</button></a>
+	      </li>
+            </ul>
             <ul class="nav navbar-nav navbar-right" style="color:grey">
               <li>
                 {# Ask the user to login or show his/her name #}
@@ -62,9 +67,6 @@
                   </a>
                 {% endif %}
               </li>
-	      <li>
-		<a href="{% node_magi_url '/' %}"><button class="btn btn-danger btn-xs">MAGI</button></a>
-	      </li>
             </ul>
           </div>
       </div>

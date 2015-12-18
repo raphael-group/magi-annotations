@@ -4,12 +4,14 @@
 {% block content %}
 <h3>Search for annotations by gene</h3>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+<p>Discover mutations and reference annotations within MAGI entered in public datasets or by users.</p>
 <form class="form-inline">
   <label for="geneName">Gene search</label>
   <input class="form-control" type="text" id="geneName" placeholder="Gene name (e.g. TP53)">
   <button id="geneSearch" type="submit" class="btn btn-default">Submit</button>
 </form>
 <br/>
+{# todo: use typehead gene-fields #}
 {% endblock %}
 {% block scripts %}
 <script type='text/javascript'>
