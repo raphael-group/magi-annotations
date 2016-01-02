@@ -2,49 +2,59 @@
 {% load annotation_tags %}
 {% block title %}MAGI :: User {{ user.get_full_name|default:user.username }}{% endblock %}
 {% block content %}
-<h3>Account page for {{user.get_full_name|default:user.username}}</h3>
-<table class='table'>
-  <thead><tr><th>Attribute</th><th>Value</th></tr></thead>
-  <tr><td>Email</td><td>{{ user.email }}</td></tr>
-</table>
-<div id="user-mutation-references">
-  <h4> Your Mutation References </h4>
-  {% for ref in user.reference_set.all %}
-  {% if forloop.first %}
-  <table class='table table-striped'>
-    <thead><tr>
-	<th>Gene</th>
-	<th>Class</th>
-	<th>Type</th>
-	<th class='thin-border-right'>Protein Sequence Change</th>
-	<th>Reference</th>
-	<th>Actions</th>
-    </tr></thead>
-    <tbody>
-  {% endif %}
-      <tr><td>{{ ref.mutation.gene }}</td>
-	<td>{{ ref.mutation.mutation_class }}</td>
-	<td>{{ ref.mutation.mutation_type }}</td>
-	<td class='thin-border-right'>{{ ref.mutation.full_change }}</td>
-	<td>{% ref_link ref.identifier ref.db %}</td>
-	<td>
-	  {% if ref.annotation_set.count > 0 %}
+<h3>Your annotations account.</h3> Manage your annotation activity here.
+<hr/>
+<h4>Account information:</h4>
+<b>Name:</b> {{user.get_full_name|default:user.username}}<br/>
+<b>Email:</b> {{ user.email }}<br/>
+<br/>
+<hr/>
+<div id="nav-user-items">
+  <h4>Your Activity</h4>
+  <ul class="nav nav-tabs">
+    <li role="presentation"><a href = "#user-mut-refs" aria-controls="user-mut-refs" role="tab" data-toggle="tab">Mutation references</a></li>
+    <li role="presentation"><a href = "#user-mut-annos" aria-controls="user-mut-annos" role="tab" data-toggle="tab">Mutation reference annotations</a></li>
+    <li role="presentation"><a href = "#user-ppi-refs" aria-controls="user-ppi-refs" role="tab" data-toggle="tab">Protein interaction references</a></li>
+    <li role="presentation"><a href = "#user-ppi-votes" aria-controls="user-ppi-votes" role="tab" data-toggle="tab">Protein interaction votes</a></li>
+  </ul>
+</div>
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane active" id="user-mut-refs">
+    {% for ref in user.reference_set.all %}
+    {% if forloop.first %}
+    <table class='table table-striped'>
+      <thead><tr>
+	  <th>Gene</th>
+	  <th>Class</th>
+	  <th>Type</th>
+	  <th class='thin-border-right'>Protein Sequence Change</th>
+	  <th>Reference</th>
+	  <th>Actions</th>
+      </tr></thead>
+      <tbody>
+	{% endif %}
+	<tr><td>{{ ref.mutation.gene }}</td>
+	  <td>{{ ref.mutation.mutation_class }}</td>
+	  <td>{{ ref.mutation.mutation_type }}</td>
+	  <td class='thin-border-right'>{{ ref.mutation.full_change }}</td>
+	  <td>{% ref_link ref.identifier ref.db %}</td>
+	  <td>
+	    {% if ref.annotation_set.count > 0 %}
 	    Cannot remove until all annotations are removed.
-	  {% else %}
+	    {% else %}
 	    <a href='{% url 'annotations:remove_reference' ref_pk=ref.pk %}'>Remove</a></li>
-          {% endif %}
-        </td></tr>
-   {% if forloop.last %}
-     </tbody>
-   </table>
-   {% endif %}
-   {% empty %}
-      <p> You have not annotated any reference mutations. </p>
-   {% endfor %}
+    {% endif %}
+    </td></tr>
+    {% if forloop.last %}
+   </tbody>
+  </table>
+{% endif %}
+{% empty %}
+<p> You have not annotated any reference mutations. </p>
+{% endfor %}
 </div>
 
-<div id="user-source-annotations">
-  <h4> Your Mutation Reference Annotations </h4>
+<div role="tabpanel" class="tab-pane" id="user-mut-annos">
   {% for sourceAnno in user.annotation_set.all %}
   {% if forloop.first %}
   <table class='table table-striped'>
@@ -54,7 +64,7 @@
 	<th>Type</th>
 	<th class='thin-border-right'>Protein Sequence Change</th>
 	<th>Reference</th>
-<!--	<th>Source</th> -->
+	<!--	<th>Source</th> -->
 	<th>Cancer</th>
 	<th>Somatic?</th>
 	<th>Measurement Type</th>
@@ -62,13 +72,13 @@
 	<th>Actions</th>
     </tr></thead>
     <tbody>
-  {% endif %}
+      {% endif %}
       <tr><td>{{ sourceAnno.reference.mutation.gene }}</td>
 	<td>{{ sourceAnno.reference.mutation.mutation_class }}</td>
 	<td>{{ sourceAnno.reference.mutation.mutation_type }}</td>
 	<td class='thin-border-right'>{{ sourceAnno.reference.mutation.full_change }}</td>
 	<td>{% ref_link sourceAnno.reference.identifier sourceAnno.reference.db %}</td>
-<!--	<td>{{ sourceAnno.source }}</td> -->
+	<!--	<td>{{ sourceAnno.source }}</td> -->
 	<td>{{ sourceAnno.cancer|default:'Unknown' }}</td>
 	<td>{{ sourceAnno.get_heritable_display }}</td>
 	<td>{{ sourceAnno.get_measurement_type_display }}</td>
@@ -77,7 +87,7 @@
 	    <li><a href='{% url 'annotations:details' ref_pk=sourceAnno.reference.pk %}'>Edit</a></li>
 	    <li><a href='{% url 'annotations:remove_annotation' gene_name=sourceAnno.reference.mutation.gene ref_pk=sourceAnno.reference.pk %}'>Remove</a></li>
       </ul></td></tr>
-  {% if forloop.last %}
+      {% if forloop.last %}
     </tbody>
   </table>
   {% endif %}
@@ -86,8 +96,7 @@
   {% endfor %}
 </div>
 
-<div id="user-interactions">
-  <h4> Your Interactions </h4>
+<div role="tabpanel" class="tab-pane" id="user-ppi-refs">
   {% for reference in user.interactionreference_set.all %} 
   {% if forloop.first %}
   <table class='table table-striped'>
@@ -99,7 +108,7 @@
 	<th>Delete?</th>
     </tr></thead>
     <tbody>
-  {% endif %}
+      {% endif %}
       <tr>
 	<td>{{ reference.interaction.source }}</td>
 	<td class='thin-border-right'>{{ reference.interaction.target }}</td>
@@ -107,7 +116,7 @@
 	<td> {{ reference.vote_count }} </td>
 	<td> <a href="{% url 'annotations:remove_interaction' reference.id %}"'>Delete</td>
       </tr>
-  {% if forloop.last %}
+      {% if forloop.last %}
     </tbody>
   </table>
   {% endif %}
@@ -116,8 +125,7 @@
   {% endfor %}
 </div>
 
-<div id="user-interactions-votes">
-  <h4> Your Interaction Votes </h4>
+<div role="tabpanel" class="tab-pane" id="user-ppi-votes">
   {% for vote in user.interactionvote_set.all %} 
   {% if forloop.first %}
   <table class='table table-striped'>
@@ -129,7 +137,7 @@
 	<th>Delete?</th>
     </tr></thead>
     <tbody>
-  {% endif %}
+      {% endif %}
       <tr>
 	<td>{{ vote.reference.interaction.source }}</td>
 	<td class='thin-border-right'>{{ vote.reference.interaction.target }}</td>
@@ -137,12 +145,13 @@
 	<td>{{ vote.is_positive|yesno:"Agree,Disagree,No comment" }}</td>
 	<td> <a href="{% url 'annotations:remove_interaction_vote' vote.id %}"'>Delete</td>
       </tr>
-  {% if forloop.last %}
+      {% if forloop.last %}
     </tbody>
   </table>
   {% endif %}
   {% empty %}
   <p> You have not annotated any reference mutations. </p>
   {% endfor %}
+</div>
 </div>
 {% endblock %}
