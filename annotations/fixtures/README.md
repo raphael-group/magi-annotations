@@ -12,7 +12,7 @@ The current workflow for creating the fixture files is:
 (from this directory)
 > python cancersToFixtures.py -cff ../../../magi/data/icgc-tcga-cancers.tsv -o icgc-tcga-cancers.json
 > python genomeToFixture.py -gf ../../../magi/data/genome/hg19_genes_list.tsv -o hg19
-> python annotationsToFixture.py -af ../../../magi/data/variant-annotations/pmc-search/tcga-pancancer-stad-pmc-search-magi-format.tsv ../../../magi/data/variant-annotations/docm/docm-variants-magi-format.tsv -cff icgc-tcga-cancers.json -o pmc-search-docm -s "PMC Search" DoCM --heritable "" Somatic
+> python annotationsToFixture.py -af ../../../magi/data/variant-annotations/pmc-search/tcga-pancancer-stad-pmc-search-magi-format.tsv ../../../magi/data/variant-annotations/docm/docm-variants-magi-format.tsv -cff icgc-tcga-cancers.json -o pmc-search-docm -s "PMC Search" DoCM --heritable "" Somatic -gf hg19-genome.json
 > bash networkToFixture.sh
 
 > cd ../.. # go to the base project directory

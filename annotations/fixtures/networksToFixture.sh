@@ -10,4 +10,4 @@ do
 	 NETWORK_FILES="${NETWORK_FILES} ${NETWORK_DIR}/${stem}.tsv"
 done
 
-python networksToFixture.py -o all-networks -nf ${NETWORK_FILES} 
+python networksToFixture.py -gf hg19-genome.json -o all-networks -nf ${NETWORK_FILES} 
