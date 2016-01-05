@@ -1,4 +1,5 @@
 import sys, os, argparse, json, glob
+import fixture_utils as django_fixtures
 
 ############### for exporting #################
 # fileGlobList 
@@ -69,6 +70,5 @@ if __name__ == '__main__':
         genome = [ parse_line_to_gene(l) for l in f if not l.startswith('#') ]
 
     # write as a json file
-    with open(args.output_prefix + '-genome.json', 'w') as out:
-        json.dump( genome, out, sort_keys=True, indent=4 )
+    django_fixtures.export_as_fixture(args.output_prefix + '-genome.json', genome)
 

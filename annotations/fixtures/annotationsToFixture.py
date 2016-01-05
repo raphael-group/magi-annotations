@@ -5,6 +5,7 @@
 # Load required modules
 import sys, os, argparse, json, re, datetime, glob
 import genomeToFixture as genome
+import fixture_utils as django_fixtures
 
 if __name__ == "__main__":
     now = datetime.date.today().strftime("%Y-%m-%d")
@@ -125,11 +126,7 @@ if __name__ == "__main__":
         annotations.append(annotation)
 
     # Output to JSON
-    with open(args.output_prefix + '-annotations.json', 'w') as out:
-        json.dump( annotations, out, sort_keys=True, indent=4 )
-    with open(args.output_prefix + '-mutations.json', 'w') as out:
-        json.dump( mutations, out, sort_keys=True, indent=4 )
-    with open(args.output_prefix + '-references.json', 'w') as out:
-        json.dump( refs, out, sort_keys=True, indent=4 )
-    with open(args.output_prefix + '-new-genes.json', 'w') as out:
-        json.dump( map(genome.newEntry, newGenes), out, sort_keys=True, indent=4 )
+    django_fixtures.export_fileset(args.output_prefix, {'-annotations.json': annotations,
+                                                        '-mutations.json': mutations,
+                                                        '-refs.json': refs,
+                                                        '-new-genes.json': map(genome.newEntry, newGenes)})

@@ -2,6 +2,7 @@
 
 # Load required modules
 import sys, os, argparse, json, re, datetime
+import fixture_utils as django_fixtures
 now = datetime.date.today().strftime("%Y-%m-%d")
 
 # Parse arguments
@@ -12,12 +13,11 @@ args = parser.parse_args( sys.argv[1:] )
 
 # Load the cancers, add the requisite info, and write to file
 with open(args.cancer_file) as f:
-    arrs = [ l.rstrip().split('\t') for l in f if not l.startswith('#') ]
-    cancers = [ ]
-    for i, arr in enumerate(arrs):
-        fields = dict(created_on=now, last_edited=now)
-        fields.update(zip(['name', 'abbr', 'color'], arr))
-        cancers.append(dict(model='annotations.cancer', pk=i+1, fields=fields))
+    # raw_data already has format name, abbr, color
+    raw_data = [ l.rstrip().split('\t') for l in f if not l.startswith('#') ]
 
-with open(args.output_file, 'w') as out:
-    json.dump(cancers, out, sort_keys=True, indent=4)
+cancers = django_fixtures.add_field_and_model_names(raw_data,
+                                                    ('name','abbr','color'), 'annotations.cancer',
+                                                    pk=True, timestamp=True)
+
+django_fixtures.export_as_fixture(args.output_file, cancers)
