@@ -16,7 +16,7 @@ The current workflow for creating the fixture files is:
 > bash networkToFixture.sh
 
 > cd ../.. # go to the base project directory
-> python manage.py loaddata annotations/fixtures/hg19-genome.json annotations/fixtures/icgc-tcga-cancers.json
+> python manage.py loaddata annotations/fixtures/hg19-genome.json annotations/fixtures/icgc-tcga-cancers.json annotations/fixtures/*genes.json
 > python manage.py loaddata annotations/fixtures/*.json
 
 ### LOGS ###
