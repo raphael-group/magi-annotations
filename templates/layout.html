@@ -22,35 +22,27 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/">MAGI Annotations</a>
+          <a class="navbar-brand" href="{% node_magi_url '/' referral_site %}">MAGI Annotations</a>
         </div>
         <div class="collapse navbar-collapse" id="magi-navbar-collapse">
           <div class="nav navbar-left">
             <div class="row">
               <div id="topNavList">
                 <ul class="nav navbar-nav">
-		  {# add dropdowns for mutations, interactions, dropdowns from nav bar #}
-                  <li class="dropdown">
-		    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
-		       aria-haspopup="true" aria-expanded="false">Mutations<span class="caret"/></a>
-		    <ul class="dropdown-menu">
-		      <li><a href="{% url 'annotations:gene_search' %}">Search by gene</a></li>
-		      <li><a href="{% url 'annotations:createMutation' %}">Add a new reference</a></li>			  
-		    </ul>
-                  <li class="dropdown">
-		    <a href="#" class"dropdown-toggle" data-toggle="dropdown" role="button"
-			 aria-haspopup="true" aria-expanded="false">Interactions<span class="caret"/></a>
-		    <ul class="dropdown-menu">
-		      <li><a href="{% url 'annotations:index_interactions' %}">Search by gene(s)</a></li>
-		      <li><a href="{% url 'annotations:add_interactions' %}">Add a new reference</a></li>			  
-		    </ul> 
+                  <li><a href="{% node_magi_url '/' referral_site %}" id="navbar-query-btn" class="qry-button">Query</a></li>
+                  <li><a href="{% node_magi_url '/upload' referral_site %}">Upload</a></li>
+                  <li><a href="{% node_magi_url '/datasets' referral_site %}">Datasets</a></li>
+                  <li><a href="{% node_magi_url '/cancers' referral_site %}">Cancers</a></li>
+                  <li><a href="{% node_magi_url '/#db-chooser' referral_site %}" id="nav-instructions">Instructions</a></li>
+                  <li><a href="{% node_magi_url '/support' referral_site %}">Support</a></li>
+                  <li><a href="{% node_magi_url '/' referral_site %}">Feedback</a></li>
                 </ul>
                 </div>
               </div>
             </div>
             <ul class="nav navbar-nav navbar-cener" style="color:grey">
 	      <li>
-		<a href="{% node_magi_url '/' %}"><button class="btn btn-danger btn-xs">MAGI</button></a>
+		<a href="{% node_magi_url '/' referral_site %}"><button class="btn btn-danger btn-xs">MAGI</button></a>
 	      </li>
             </ul>
             <ul class="nav navbar-nav navbar-right" style="color:grey">
@@ -76,16 +68,16 @@
   <footer>
     <hr/>
     <div id="footer", class="container">
-      <p class="col-lg-4 text-left">Updated: October 5th, 2015</p>
-      <p class="col-lg-4 text-center">Copyright 2014-2015. All rights reserved.</p>
+      <p class="col-lg-4 text-left">Updated: June 21st, 2016</p>
+      <p class="col-lg-4 text-center">Copyright 2014-2016. All rights reserved.</p>
       <ul id="more-info", class="col-lg-4 text-right">
-        <li><a href="{{ node_magi_url }}/acknowledgements">Acknowledgements</a></li>
-        <li><a href="{{ node_magi_url }}/support">Support</a></li>
+        <li><a href="{{ node_magi_url '/acknowledgements' referral_site %}">Acknowledgements</a></li>
+        <li><a href="{{ node_magi_url '/support' referral_site %}">Support</a></li>
       </ul>
       <ul id="even-more-info">
-        <li><a href="{% node_magi_url 'contact' %}">Contact</a></li>
-        <li><a href="{% node_magi_url '/privacy' %}" target="_new">Privacy</a></li>
-        <li><a href="{% node_magi_url '/terms' %}" target="_new">Terms</a></li>
+        <li><a href="{% node_magi_url 'contact' referral_site %}">Contact</a></li>
+        <li><a href="{% node_magi_url '/privacy' referral_site %}" target="_new">Privacy</a></li>
+        <li><a href="{% node_magi_url '/terms' referral_site %}" target="_new">Terms</a></li>
       </ul>
     </div>
   </footer>
