@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
+from django.template.response import SimpleTemplateResponse, TemplateResponse
 from .models import *
 from .forms import *
 from django.db.models import Count, Q, Case, Value, When
@@ -25,7 +26,7 @@ def prefill_from_query_params(query_params, *form_list):
 
     if len(init_values) == 1:
         return init_values[0]
-    
+
     return init_values
 
 ## CREATE operations ##
@@ -174,7 +175,7 @@ def add_interactions(request):
             interxn.save()
         elif interaction_form.non_field_errors().as_text() == '* Interaction is not unique.':
             interxn = Interaction.objects.get(**remove_extra_fields(interaction_form.cleaned_data, Interaction))
-            
+
 
         if interxn:
             ref_id = interaction_form.cleaned_data['reference_identifier'] # create
@@ -277,8 +278,12 @@ def gene(request, gene_name):
     references = sorted(pkToAnnotation.values(), key=lambda r: (not r['user_annotated'], r['no_annotations'], r['mutation__locus']))
 
     # Render the view
-    context = dict(references=references, gene=gene_name, mapper=modelChoiceMappers, path=request.path)
-    return render(request, 'annotations/gene.html', context)
+    context = dict(references=references,
+                   gene=gene_name,
+                   mapper=modelChoiceMappers,
+                   path=request.path)
+
+    return TemplateResponse(request, 'annotations/gene.html', context=context)
 
 def details(request, ref_pk):
     # Retrieve the annotations for this reference
@@ -296,7 +301,7 @@ def details(request, ref_pk):
             context['user_annotation'] = user_annotation
         except Annotation.DoesNotExist:
             context['annotation_form'] = AnnotationForm()
-    return render(request, 'annotations/details.html', context)
+    return TemplateResponse(request, 'annotations/details.html', context=context)
 
 # necessary for the typeahead code to get a list of genes
 def list_genes_as_json(request):
