@@ -95,7 +95,6 @@
   // Highlight clicked rows on click
   $('tr.ref-row').dblclick(function(){ $('tr.ref-row').removeClass('highlight'); });
   $('td.ref-link a').click(function(){
-      console.log("HELLO")
       $('tr.ref-row').removeClass('highlight');
       $(this).parent().parent().addClass('highlight');
   });
