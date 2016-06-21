@@ -2,5 +2,6 @@
 {% block title %}MAGI :: Login{% endblock %}
 {% block content %}
 <h3>Login to MAGI</h3>
-<a href='{% url 'social:begin' 'google-oauth2' %}?next={{ path }}'><button class='btn btn-primary'>Login with Google</button></a>
+{# we urlencode the path to keep query characters escaped #}
+<a href='{% url 'social:begin' 'google-oauth2' %}?next={{ path|urlencode }}'><button class='btn btn-primary'>Login with Google</button></a>
 {% endblock %}

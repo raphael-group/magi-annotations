@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% load annotation_tags %}
+{% block title %} Search for interactions{% endblock %}
+{% block content %}
+<h3>Search for interactions by gene lists</h3>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+<br/>
+<p>Discover protein interactions in MAGI entered in public datasets or by users.</p>
+<ul>
+<li>For all interactions involving a single gene, enter that gene (<i>e.g.</i> STAG2).</li>
+<li>For all interactions within a set of genes, enter a list of genes separated by commas (<i>e.g.</i> STAG2, SMC1A).</li>
+</ul>
+<form class="form-inline">
+  <label for="geneName">Gene list search</label>
+  <input class="form-control" type="text" id="geneName" placeholder="List of gene names (e.g. STAG1, SMC1A)">
+  <button id="geneSearch" type="submit" class="btn btn-default">Submit</button>
+</form>
+{# todo: implement a multi-select form widget, and use typehead gene-fields #}
+<br/>
+{% endblock %}
+{% block scripts %}
+<script type='text/javascript'>
+  // Activate tooltips
+  $(function(){ $('span.tooltip-toggle').tooltip() });
+
+  // Perform gene search
+  $('button#geneSearch').click(function(e){
+    e.preventDefault();
+    var geneList = $('input#geneName').val().replace(/ /g,'');
+    if (geneName == ''){
+      alert('Please enter a list of genes.');
+    } else {
+      window.location = '/annotations/interactions/' + geneList;
+    }
+  });
+</script>
+{% endblock %}

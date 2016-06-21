@@ -43,7 +43,8 @@ INSTALLED_APPS = (
     'social.apps.django_app.default',
     'annotations',
     'accounts',
-    'magipy'
+    'magipy',
+    'widget_tweaks'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -130,3 +131,19 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATIC_ROOT = os.environ.get('MAGI_STATIC_ROOT', '/var/www/magipy/static/')
+
+if os.environ.get('MAGI_PYTHON_ENV', 'development').lower() == 'production':
+    # Security for producttion environment - suggested by manage.py check --deploy
+    # See https://docs.djangoproject.com/en/1.8/ref/settings/ for detailed info
+    SECURE_CONTENT_TYPE_NOSNIFF=True
+    SECURE_BROWSER_XSS_FILTER=True
+    CSRF_COOKIE_HTTPONLY=True
+    CSRF_COOKIE_SECURE=True
+#    SESSION_COOKIE_SECURE=True
+    X_FRAME_OPTIONS='DENY'
+
+    # If we want MAGI to be https only, we have to set this as well as the header,
+    # and also change NGINX settings:
+    # See https://docs.djangoproject.com/en/1.8/ref/settings/#std:setting-SECURE_PROXY_SSL_HEADER
+    #SECURE_SSL_REDIRECT=True
+    #SECURE_PROXY_SSL_HEADER="HTTP_"

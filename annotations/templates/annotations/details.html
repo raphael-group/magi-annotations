@@ -3,8 +3,8 @@
 Annotations for {{ mutation.gene }} ({{ mutation.original_amino_acid}}{{ mutation.locus }}{{ mutation.new_amino_acid }}) with reference {{ ref.db }}{{ ref.identifier}} from {{ ref.source }}
 {% endblock %}
 {% block content %}
-{% load annotation_filters %}
 {% load annotation_tags %}
+{% load widget_tweaks %}
 <h3 class='text-center'>Annotations for <a href='{% url 'annotations:gene' gene_name=mutation.gene %}'>{{ mutation.gene }}</a> ({{ mutation.original_amino_acid}}{{ mutation.locus }}{{ mutation.new_amino_acid }}) with reference {% ref_link ref.identifier ref.db %} from {{ ref.source }}</h3>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 <!-- Add/Edit annotation panel  -->
@@ -30,19 +30,19 @@ Annotations for {{ mutation.gene }} ({{ mutation.original_amino_acid}}{{ mutatio
           <input type='hidden' name='reference_id' value='{{ ref.pk }}'>
           <div class="form-group">
             <label for='cancer'>Cancer</label>
-            {{ annotation_form.cancer|addclass:'form-control' }}
+            {{ annotation_form.cancer|add_class:'form-control' }}
           </div>
           <div class="form-group">
             <label>Heritability</label>
-            {{ annotation_form.heritable|addclass:'form-control' }}
+            {{ annotation_form.heritable|add_class:'form-control' }}
           </div>
           <div class="form-group">
             <label>Measurement Type</label>
-            {{ annotation_form.measurement_type|addclass:'form-control' }}
+            {{ annotation_form.measurement_type|add_class:'form-control' }}
           </div>
           <div class="form-group">
             <label>Characterization</label>
-            {{ annotation_form.characterization|addclass:'form-control' }}
+            {{ annotation_form.characterization|add_class:'form-control' }}
           </div>
           <div class="form-group">
             <label for='comment'>Comment</label>
@@ -72,9 +72,9 @@ Annotations for {{ mutation.gene }} ({{ mutation.original_amino_acid}}{{ mutatio
       <tr style='{% if user.is_authenticated and A.user.pk == user.pk %}background:lightyellow;{% endif %}'>
         <td>{{ A.last_edited }}</td>
         <td>{{ A.cancer|default:'Unknown'}}</td>
-        <td>{{ A.get_heritable_display|default:'Unknown'}}</td>
-        <td>{{ A.get_measurement_type_display|default:'Unknown'}}</td>
-        <td>{{ A.get_characterization_display|default:'Unknown'}}</td>
+        <td>{{ A.get_heritable_display }}</td>
+        <td>{{ A.get_measurement_type_display }}</td>
+        <td>{{ A.get_characterization_display }}</td>
         <td>{{ A.comment|default:'None' }}</td>
       </tr>
       {% endfor %}

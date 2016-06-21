@@ -67,3 +67,7 @@ Bower, and then install the dependencies, with the commands:
         >>> bower install
 
   This assumes that you have Node.js installed.
+
+## Adding initial data:
+
+Please read annotations/fixtures/README.md.

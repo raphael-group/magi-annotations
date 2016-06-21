@@ -6,6 +6,7 @@
   <meta name="description" content="MAGI web application">
   <meta name="author" content="Raphael research group at Brown University">
   {% load staticfiles %}
+  <link rel="icon" type="image/png" href="{% static "img/favicon-wand.png" %}">
   <link rel="stylesheet" href="{% static "components/bootstrap/dist/css/bootstrap.min.css" %}">
   <link rel="stylesheet" href="{% static "css/app.css" %}">
 </head>
@@ -21,24 +22,37 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/">MAGI</a>
+          <a class="navbar-brand" href="/">MAGI Annotations</a>
         </div>
         <div class="collapse navbar-collapse" id="magi-navbar-collapse">
           <div class="nav navbar-left">
             <div class="row">
               <div id="topNavList">
                 <ul class="nav navbar-nav">
-                  <li><a href="{% node_magi_url '/' %}" id="navbar-query-btn" class="qry-button">Query</a></li>
-                  <li><a href="{% node_magi_url '/upload' %}">Upload</a></li>
-                  <li><a href="{% node_magi_url '/datasets' %}">Datasets</a></li>
-                  <li><a href="{% node_magi_url '/cancers' %}">Cancers</a></li>
-                  <li><a href="{% node_magi_url '/#db-chooser' %}" id="nav-instructions">Instructions</a></li>
-                  <li><a href="{% node_magi_url '/support' %}">Support</a></li>
-                  <li><a href="{% node_magi_url '/' %}">Feedback</a></li>
+		  {# add dropdowns for mutations, interactions, dropdowns from nav bar #}
+                  <li class="dropdown">
+		    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
+		       aria-haspopup="true" aria-expanded="false">Mutations<span class="caret"/></a>
+		    <ul class="dropdown-menu">
+		      <li><a href="{% url 'annotations:gene_search' %}">Search by gene</a></li>
+		      <li><a href="{% url 'annotations:createMutation' %}">Add a new reference</a></li>			  
+		    </ul>
+                  <li class="dropdown">
+		    <a href="#" class"dropdown-toggle" data-toggle="dropdown" role="button"
+			 aria-haspopup="true" aria-expanded="false">Interactions<span class="caret"/></a>
+		    <ul class="dropdown-menu">
+		      <li><a href="{% url 'annotations:index_interactions' %}">Search by gene(s)</a></li>
+		      <li><a href="{% url 'annotations:add_interactions' %}">Add a new reference</a></li>			  
+		    </ul> 
                 </ul>
                 </div>
               </div>
             </div>
+            <ul class="nav navbar-nav navbar-cener" style="color:grey">
+	      <li>
+		<a href="{% node_magi_url '/' %}"><button class="btn btn-danger btn-xs">MAGI</button></a>
+	      </li>
+            </ul>
             <ul class="nav navbar-nav navbar-right" style="color:grey">
               <li>
                 {# Ask the user to login or show his/her name #}

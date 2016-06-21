@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+{% load annotation_filters %}
+{% load annotation_tags %}
+{% block title %}Protein-protein interactions for {{ gene_list|join:"," }}{% endblock %}
+{% block content %}
+<h3>Protein-protein interactions for {{ gene_list|join:"," }}</h3>
+<br/>
+<table class='table table-striped'>
+  <tr style='background:#d3d3d3'>
+    <th>Source</th>
+    <th>Target</th>
+    <th style='border-right:1px solid #000'>Network</th>
+    <th>Reference</th>
+    <th>Votes</th>
+    <th>Annotate
+	    {% if not user.is_authenticated %}
+	    (You must be logged in.)
+	    {% endif %}
+    </th>
+  </tr>
+  {% for interxn in interactions %}
+  {% for ref in interxn.interactionreference_set.all %}
+  <tr>
+	  <td>{{ interxn.source }}</td>
+	  <td>{{ interxn.target }}</td>
+	  <td style='border-right:1px solid #000'>{{ interxn.input_source }}</td>
+	  <td>
+		  {% ref_link ref.identifier ref.db %}
+	  </td>
+	  <td> {{ ref.vote_count }} </td>
+	  <td>
+	      {% if user %}
+	      {% with pk=ref.pk %}
+	      <ul style='padding-left:12px'>
+		      {% if pk not in user_votes %}
+		      <li><a href='#' class='vote upvote' refId='{{ pk }}'> Upvote</a></li>
+		      <li><a href='#' class='vote downvote' refId='{{ pk }}'> Downvote</a></li>
+		      {% elif user_votes|get_item:pk %}
+		      <li><a href='#' class='vote remove-vote' refId='{{ pk }}'> Remove upvote</a></li>
+		      <li><a href='#' class='vote downvote' refId='{{ pk }}'> Downvote</a></li>
+		      {% else %}
+		      <li><a href='#' class='vote upvote' refId='{{ pk }}'> Upvote</a></li>
+		      <li><a href='#' class='vote remove-vote' refId='{{ pk }}'> Remove downvote</a></li>
+		      {% endif %}
+	      </ul>
+	      {% endwith %}
+	      {% endif %}
+	  </td>
+  </tr>
+  {% empty %}
+  <tr>
+	  <td>{{ interxn.source }}</td>
+	  <td>{{ interxn.target }}</td>
+	  <td style='border-right:1px solid #000'>{{ interxn.input_source }}</td>
+	  <td> None </td>
+	  <td> 0 </td>
+	  <td> No reference to vote on. </td>
+  </tr>
+
+  {% endfor %}
+    {% empty %}
+    <tr><td colspan='6' style='text-align:center'>Sorry, no interactions for {{ gene_list|join:"," }}.</td></tr>
+    {% endfor %}
+</table>
+<p>Other links:</p> <ul>
+<li><a href='{% url 'annotations:index_interactions' %}'>Search for protein interactions </a></li>
+<li><a href='{% url 'annotations:add_interactions' %}'>Add an interaction </a></li>
+</ul>
+<form id='vote' method='POST' action='{% url 'annotations:vote_interactions' %}'>
+	{% csrf_token %}
+	<input type='hidden' name='refId' id='refId'>
+	<input type='hidden' name='is_positive' id='is_positive'>
+	<input type='hidden' name='delete' id='delete'>
+</form>
+{% endblock %}
+{% block scripts %}
+<script type='text/javascript'>
+// Vote links
+hiddenForm = $('form#vote');
+  $(document).ready(function () {
+	  $('a.vote').click(function(e){
+		  e.preventDefault();
+		  var link = $(this);
+		  hiddenForm.children('#refId').val(link.attr('refId'));
+		  hiddenForm.children('#is_positive').val(link.hasClass('upvote'));
+		  hiddenForm.children('#delete').val(link.hasClass('remove-vote'));
+		  hiddenForm.submit();
+	  });
+  });
+</script>
+{% endblock %}
