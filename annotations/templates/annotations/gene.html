@@ -26,13 +26,13 @@
     <th>Annotate</th>
   </tr>
   {% for ref in references %}
-    <tr>
+    <tr class="ref-row">
       <td>{{ ref.mutation__mutation_class }}</td>
       <td>{{ ref.mutation__mutation_type }}</td>
       <td style='border-right:1px solid #000'>
         {{ ref.mutation__original_amino_acid }}{{ ref.mutation__locus }}{{ ref.mutation__new_amino_acid }}
       </td>
-      <td>{% ref_link ref.identifier ref.db %}</td>
+      <td class='ref-link'>{% ref_link ref.identifier ref.db %}</td>
       <td>{{ ref.source }}</td>
       <td>{% count_tooltip 'Cancer' ref.counter.annotation__cancer__abbr 'right' 'upper' %}</td>
       <td>{% count_tooltip 'Heritable' ref.counter.annotation__heritable 'right' mapper=mapper.heritable %}</td>
@@ -90,6 +90,14 @@
       if (val != '') hiddenForm.children('#' + n).val(val);
     });
     hiddenForm.submit();
+  });
+
+  // Highlight clicked rows on click
+  $('tr.ref-row').dblclick(function(){ $('tr.ref-row').removeClass('highlight'); });
+  $('td.ref-link a').click(function(){
+      console.log("HELLO")
+      $('tr.ref-row').removeClass('highlight');
+      $(this).parent().parent().addClass('highlight');
   });
 </script>
 {% endblock %}

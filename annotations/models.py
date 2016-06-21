@@ -27,6 +27,9 @@ class Cancer(models.Model):
 
     def __unicode__(self): return '{} ({})'.format(self.name, self.abbr)
 
+    class Meta:
+        ordering = ["name"]
+
 class Gene(models.Model):
     name = models.CharField(max_length=30, primary_key = True)
     chromosome = models.CharField(max_length=2, null = True)
