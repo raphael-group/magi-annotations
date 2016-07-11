@@ -1,8 +1,8 @@
 # MAGI Annotations #
 
-[MAGI Annotations](annotations.cs.brown.edu) is a Django web server that allows users to view and edit annotations of mutation and protein-protein interactions. It is complementary to [MAGI](http://magi.brown.edu). MAGI Annotations was built and is maintained by the Raphael group at Brown University.
+[MAGI Annotations](http://annotations.cs.brown.edu) is a Django web server that allows users to view and edit annotations of mutation and protein-protein interactions. It is complementary to [MAGI](http://magi.brown.edu). MAGI Annotations was built and is maintained by the Raphael group at Brown University.
 
-### SETUP ###
+### Setup ###
 
 1. **Set your environment variables (see below)**. We suggest making a file `ENVIRONMENT` and then loading the variables into your shell with `source ENVIRONMENT`.
 2. **Install dependencies (see below)**.
@@ -21,7 +21,7 @@
 
 5. **Initialize the database**. We provide a tarball of the data used to initialize [MAGI Annotations](annotations.cs.brown.edu) on our group website. We provide the `setup.sh` script for convenience which includes the contains the commands for initializing the database.
 
-#### DEPENDENCIES ####
+#### Dependencies ####
 
 Latest tested version in parentheses.
 
@@ -38,9 +38,9 @@ following commands on the command-line:
         >>> npm install -g bower
         >>> bower install
 
-See our wiki page  [Getting-set-up-with-MAGI-Annotations](https://github.com/raphael-group/magi-annotations/wiki/Getting-set-up-with-MAGI-Annotations) for additional instructions.
+See our wiki page  [Getting set up with MAGI Annotations](https://github.com/raphael-group/magi-annotations/wiki/Getting-set-up-with-MAGI-Annotations) for additional instructions.
 
-#### ENVIRONMENT VARIABLES ####
+#### Environment variables ####
 
 Many of the settings of MAGI Annotations are configurable with the following environment variables. Note that some of these environment variables overlap with MAGI (see [MAGI: Environment](https://github.com/raphael-group/magi#environment)), so be sure to set these appropriately.
 
@@ -61,7 +61,7 @@ Many of the settings of MAGI Annotations are configurable with the following env
 
 We suggest creating a file `ENVIRONMENT` and exporting each variable (e.g. `export MAGI_SITE_URL="http://localhost:8000"`), and then loading these into your shell with `source ENVIRONMENT`.
 
-### USAGE ###
+### Usage ###
 
 Run the server:
 
