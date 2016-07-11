@@ -55,6 +55,7 @@ Many of the settings of MAGI Annotations are configurable with the following env
 | `POSTGRES_DJANGO_PORT`        | `'5432'`                  | Name of Postgres port                                         |
 | `POSTGRES_DJANGO_USER`        | `'postgres'`              | Name of Postgres user                                         |
 | `POSTGRES_DJANGO_PASSWORD`    | None                      | Name of Postgres host                                         |
+| `MAGI_STATIC_ROOT`            | `'/var/www/magipy/static/'` | Path for static files                                       |
 | `MAGIPY_GOOGLE_CLIENT_ID`     | None                      | Google OAuth2 client ID                                       |
 | `MAGIPY_GOOGLE_CLIENT_SECRET` | None                      | Google OAuth2 client secret                                   |
 | `NODE_MAGI_URL`               | `'http://localhost:8000'` | URL for MAGI server                                           |
