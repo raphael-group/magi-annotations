@@ -1,73 +1,68 @@
-# README #
+# MAGI Annotations #
 
-### GETTING STARTED ###
+[MAGI Annotations](annotations.cs.brown.edu) is a Django web server that allows users to view and edit annotations of mutation and protein-protein interactions. It is complementary to [MAGI](http://magi.brown.edu). MAGI Annotations was built and is maintained by the Raphael group at Brown University.
 
-1. Set your environment variables (see below).
-2. Install the requirements below.
-3. Run the migrations.
+### SETUP ###
+
+1. **Set your environment variables (see below)**. We suggest making a file `ENVIRONMENT` and then loading the variables into your shell with `source ENVIRONMENT`.
+2. **Install dependencies (see below)**.
+3. **Setup your Postgres user and database.**   Then set up your Postgres user and database. For example (depending on your set up, these commands may differ slightly):
+
+        >>> createuser $POSTGRES_DJANGO_USER
+        >>> createdb $POSTGRES_DJANGO_DBNAME
+
+3. **Run the migrations**. This will setup the tables in your Postgres database.
 
         python manage.py migrate
 
-4. Create a superuser.
+4. **Create a superuser**.
 
         python manage.py createsuperuser
 
-5. Run the server.
+5. **Initialize the database**. We provide a tarball of the data used to initialize [MAGI Annotations](annotations.cs.brown.edu) on our group website. We provide the `setup.sh` script for convenience which includes the contains the commands for initializing the database.
 
-        python manage.py runserver $MAGI_PORT
+#### DEPENDENCIES ####
 
-#### ENVIRONMENT VARIABLES ####
+Latest tested version in parentheses.
 
-Many of the settings of MAGI are configurable with the following environment
-variables:
-
-| Name                        | Default value   |
-| --------------------------- | --------------- |
-| `MAGI_SITE_URL`             | `''`            |
-| `MAGI_GOOGLE_CLIENT_ID`     | `''`            |
-| `MAGI_GOOGLE_CLIENT_SECRET` | `''`            |
-| `MAGI_PYTHON_ENV`           | `'development'` |
-| `MAGI_PORT`                 | `'8080'`        |
-| `MAGI_POSTGRES_USER`        | `'mdml'`        |
-| `MAGI_POSTGRES_PASSWORD`    | `''`            |
-| `MAGI_POSTGRES_PORT`        | `'5432'`        |
-| `MAGI_POSTGRES_HOST`        | `''`            |
-| `MAGI_POSTGRES_DB`          | `'magipy'`      |
-
-### REQUIREMENTS ###
-
-#### DEBIAN ####
-1. **Postgres**. This can be installed on using the command:
-
-        >>> sudo apt-get install postgresql postgresql-client
-
-  Then set up your user and database:
-
-        >>> sudo -u postgres createuser $MAGI_POSTGRES_USER
-        >>> createdb $MAGI_POSTGRES_DB
-
-  Note that if you don't set up a password for your $USER, you should exclude
-the 'HOST' line in the `DATABASES` settings in `magipy/settings.py`.
-
-2. **Python**. First, install dependencies:
-
-        >>> sudo apt-get install libpq-dev python-dev
-
-  We can manage Python requirements using virtualenv and pip. Execute the
+1. **Python** (2.7.11). We suggest managing Python requirements using virtualenv and pip. Execute the
 following commands on the command-line:
 
         >>> virtualenv venv
         >>> source venv/bin/activate
         >>> pip install -r requirements.txt
+2. **Postgres** (9.5.3).
 
-3. **Bower**. Bower is required for managing Javascript dependencies. Install
-Bower, and then install the dependencies, with the commands:
+3. **Bower**. Bower is required for managing Javascript dependencies. First, you will need to install [Node.js](https://nodejs.org/en/) and [NPM](https://www.npmjs.com/). Then, install [Bower](http://bower.io/), and use it to install the Javascript dependencies:
 
         >>> npm install -g bower
         >>> bower install
 
-  This assumes that you have Node.js installed.
+See our wiki page  [Getting-set-up-with-MAGI-Annotations](https://github.com/raphael-group/magi-annotations/wiki/Getting-set-up-with-MAGI-Annotations) for additional instructions.
 
-## Adding initial data:
+#### ENVIRONMENT VARIABLES ####
 
-Please read annotations/fixtures/README.md.
+Many of the settings of MAGI Annotations are configurable with the following environment variables. Note that some of these environment variables overlap with MAGI (see [MAGI: Environment](https://github.com/raphael-group/magi#environment)), so be sure to set these appropriately.
+
+| **Name**                      | **Default**               | **Description**                                               |
+| ----------------------------- | ------------------------- | ------------------------------------------------------------- |
+| `MAGIPY_PORT`                 | `'8080'`                  | Port from which you are serving MAGI                          |
+| `MAGIPY_ENV`                  | `'development'`           | "production" for publicly available on the web, or "development" for local/testing |
+| `MAGIPY_SITE_URL`             | `''`                      | URL for MAGI Annotations server (required in production only) |
+| `MAGI_SECRET_KEY`             | `'MAGI_FOR_PRESIDENT'`    | Secret key (required in production only)                      |
+| `POSTGRES_DJANGO_DBNAME`      | `'magipy'`                | Name of Postgres database                                     |
+| `POSTGRES_DJANGO_HOST`        | None                      | Name of Postgres host                                         |
+| `POSTGRES_DJANGO_PORT`        | `'5432'`                  | Name of Postgres port                                         |
+| `POSTGRES_DJANGO_USER`        | `'postgres'`              | Name of Postgres user                                         |
+| `POSTGRES_DJANGO_PASSWORD`    | None                      | Name of Postgres host                                         |
+| `MAGIPY_GOOGLE_CLIENT_ID`     | None                      | Google OAuth2 client ID                                       |
+| `MAGIPY_GOOGLE_CLIENT_SECRET` | None                      | Google OAuth2 client secret                                   |
+| `NODE_MAGI_URL`               | `'http://localhost:8000'` | URL for MAGI server                                           |
+
+We suggest creating a file `ENVIRONMENT` and exporting each variable (e.g. `export MAGI_SITE_URL="http://localhost:8000"`), and then loading these into your shell with `source ENVIRONMENT`.
+
+### USAGE ###
+
+Run the server:
+
+    python manage.py runserver $MAGIPY_PORT

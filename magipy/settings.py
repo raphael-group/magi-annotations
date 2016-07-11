@@ -20,15 +20,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('MAGI_SECRET_KEY', '^i377a$-k4zce3e%yah$!p&n)yaj_qlxkkz+x43v0!(pkux-qa')
+SECRET_KEY = os.environ.get('MAGI_SECRET_KEY', 'MAGI_FOR_PRESIDENT!')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('MAGI_PYTHON_ENV', 'development').lower() == 'development'
+DEBUG = os.environ.get('MAGIPY_ENV', 'development').lower() == 'development'
 
 #if not DEBUG: raise ValueError('MAGIPY in production mode is not fully implemented.')
 ALLOWED_HOSTS = []
-if 'MAGI_SITE_URL' in os.environ:
-    ALLOWED_HOSTS += os.environ.get('MAGI_SITE_URL', '').split(',')
+if 'MAGIPY_SITE_URL' in os.environ:
+    ALLOWED_HOSTS += os.environ.get('MAGIPY_SITE_URL', '').split(',')
 
 # Application definition
 
@@ -88,8 +88,8 @@ AUTHENTICATION_BACKENDS = (
    'django.contrib.auth.backends.ModelBackend',
 )
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('MAGI_GOOGLE_CLIENT_ID')
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('MAGI_GOOGLE_CLIENT_SECRET')
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('MAGIPY_GOOGLE_CLIENT_ID')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('MAGIPY_GOOGLE_CLIENT_SECRET')
 LOGIN_URL = '/account/login'
 WSGI_APPLICATION = 'magipy.wsgi.application'
 NODE_MAGI_URL = os.environ.get('NODE_MAGI_URL', 'http://localhost:8000')
@@ -100,11 +100,11 @@ NODE_MAGI_URL = os.environ.get('NODE_MAGI_URL', 'http://localhost:8000')
 DATABASES = {
     'default': {
         'ENGINE'  : 'django.db.backends.postgresql_psycopg2',
-        'NAME'    : os.environ.get('MAGI_POSTGRES_DB', 'magipy'),
-        'USER'    : os.environ.get('MAGI_POSTGRES_USER', 'postgres'),
-        'PASSWORD': os.environ.get('MAGI_POSTGRES_PASSWORD', ''),
-        'HOST'    : os.environ.get('MAGI_POSTGRES_HOST', ''),
-        'PORT'    : os.environ.get('MAGI_POSTGRES_PORT', '5432'),
+        'NAME'    : os.environ.get('POSTGRES_DJANGO_DBNAME', 'magipy'),
+        'USER'    : os.environ.get('POSTGRES_DJANGO_USER', 'postgres'),
+        'PASSWORD': os.environ.get('POSTGRES_DJANGO_PASSWORD', ''),
+        'HOST'    : os.environ.get('POSTGRES_DJANGO_HOST', ''),
+        'PORT'    : os.environ.get('POSTGRES_DJANGO_PORT', '5432'),
         'client_encoding': 'UTF8',
         'default_transaction_isolation': 'read committed',
         'timezone': 'UTC'
@@ -133,7 +133,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATIC_ROOT = os.environ.get('MAGI_STATIC_ROOT', '/var/www/magipy/static/')
 
-if os.environ.get('MAGI_PYTHON_ENV', 'development').lower() == 'production':
+if os.environ.get('MAGIPY_ENV', 'development').lower() == 'production':
     # Security for producttion environment - suggested by manage.py check --deploy
     # See https://docs.djangoproject.com/en/1.8/ref/settings/ for detailed info
     SECURE_CONTENT_TYPE_NOSNIFF=True

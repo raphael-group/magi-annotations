@@ -2,7 +2,7 @@ import sys, os, argparse, json, glob
 import fixture_utils as django_fixtures
 
 ############### for exporting #################
-# fileGlobList 
+# fileGlobList
 def readExisting(fileGlobList, keyfield):
     existing = set()
     fixture_files = []
@@ -51,11 +51,11 @@ def newEntry(gene_name):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-gf', '--genome_file', type=str, required=True)
-    parser.add_argument('-o', '--output_prefix', type=str, required=True)
+    parser.add_argument('-o', '--output_file', type=str, required=True)
 
     args = parser.parse_args(sys.argv[1:])
 
-    # genome has gene, chromosome, 
+    # genome has gene, chromosome,
     def parse_line_to_gene(line):
         gene, chromosome, locus_start, locus_end = line.rstrip('\n').split('\t')
         return dict(model = 'annotations.gene', fields = dict(
@@ -70,5 +70,4 @@ if __name__ == '__main__':
         genome = [ parse_line_to_gene(l) for l in f if not l.startswith('#') ]
 
     # write as a json file
-    django_fixtures.export_as_fixture(args.output_prefix + '-genome.json', genome)
-
+    django_fixtures.export_as_fixture(args.output_file, genome)
