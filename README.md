@@ -8,8 +8,8 @@
 2. **Install dependencies (see below)**.
 3. **Setup your Postgres user and database.**   Then set up your Postgres user and database. For example (depending on your set up, these commands may differ slightly):
 
-        >>> createuser $POSTGRES_DJANGO_USER
-        >>> createdb $POSTGRES_DJANGO_DBNAME
+        createuser $POSTGRES_DJANGO_USER
+        createdb $POSTGRES_DJANGO_DBNAME
 
 3. **Run the migrations**. This will setup the tables in your Postgres database.
 
@@ -28,15 +28,15 @@ Latest tested version in parentheses.
 1. **Python** (2.7.11). We suggest managing Python requirements using virtualenv and pip. Execute the
 following commands on the command-line:
 
-        >>> virtualenv venv
-        >>> source venv/bin/activate
-        >>> pip install -r requirements.txt
+        virtualenv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
 2. **Postgres** (9.5.3).
 
 3. **Bower**. Bower is required for managing Javascript dependencies. First, you will need to install [Node.js](https://nodejs.org/en/) and [NPM](https://www.npmjs.com/). Then, install [Bower](http://bower.io/), and use it to install the Javascript dependencies:
 
-        >>> npm install -g bower
-        >>> bower install
+        npm install -g bower
+        bower install
 
 See our wiki page  [Getting set up with MAGI Annotations](https://github.com/raphael-group/magi-annotations/wiki/Getting-set-up-with-MAGI-Annotations) for additional instructions.
 
