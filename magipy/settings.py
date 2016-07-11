@@ -139,7 +139,7 @@ if os.environ.get('MAGIPY_ENV', 'development').lower() == 'production':
     SECURE_CONTENT_TYPE_NOSNIFF=True
     SECURE_BROWSER_XSS_FILTER=True
     CSRF_COOKIE_HTTPONLY=True
-    CSRF_COOKIE_SECURE=True
+    CSRF_COOKIE_SECURE=False
 #    SESSION_COOKIE_SECURE=True
     X_FRAME_OPTIONS='DENY'
 
